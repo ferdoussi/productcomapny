@@ -1,13 +1,26 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import * as Animatable from "react-native-animatable";
 
 const WelcomeScreen = () => {
   return (
     <View style={styles.View}>
       <Text style={styles.test}>Test:</Text>
       <View style={styles.overlay}>
-        <Text style={styles.welcomeText}>Welcome to My App</Text>
-        <Text style={styles.subtitle}>Your adventure starts here</Text>
+        <Animatable.Text 
+          animation="slideInDown" iterationCount={50} direction="alternate"
+          style={styles.welcomeText}
+        >
+          Welcome to My App
+        </Animatable.Text>
+        <Animatable.Text 
+          animation="fadeIn" 
+          delay={500} 
+          duration={1500} 
+          style={styles.subtitle}
+        >
+          Your adventure starts here
+        </Animatable.Text>
       </View>
     </View>
   );

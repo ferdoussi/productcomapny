@@ -1,37 +1,59 @@
-import React from 'react';
-import { StyleSheet, View, Text, Image } from 'react-native';
+import React, { useRef } from 'react';
+import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 const EventCard = () => {
+  const scrollViewRef = useRef(null);
+
+  const scrollLeft = () => {
+    scrollViewRef.current?.scrollTo({ x: 0, animated: true });
+  };
+
+  const scrollRight = () => {
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  };
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.header}>
         <Text style={styles.headingText}>Product:</Text>
-        <Text style={styles.showText}>All
+        <Text style={styles.showText}>
+          All
           <AntDesign name="arrowright" size={24} color="#203165" />
         </Text>
       </View>
       <View style={styles.container}>
-      <ScrollView  horizontal={true}>
-        <View style={[styles.card, styles.cardElevated]}>
-          <Image source={require('../assets/image/elc.jpg')} style={styles.image} />
+        <View style={styles.scrollWrapper}>
+          <TouchableOpacity style={styles.scrollButton} onPress={scrollLeft}>
+            <AntDesign name="left" size={20} color="#203165" />
+          </TouchableOpacity>
+          <ScrollView
+            horizontal={true}
+            ref={scrollViewRef}
+            style={styles.scrollView}
+            showsHorizontalScrollIndicator={false}
+          >
+            <View style={[styles.card, styles.cardElevated]}>
+              <Image source={require('../assets/image/elc.jpg')} style={styles.image} />
+            </View>
+            <View style={[styles.card, styles.cardElevated]}>
+              <Image source={require('../assets/image/menage.jpg')} style={styles.image} />
+            </View>
+            <View style={[styles.card, styles.cardElevated]}>
+              <Image source={require('../assets/image/plb.jpg')} style={styles.image} />
+            </View>
+            <View style={[styles.card, styles.cardElevated]}>
+              <Image source={require('../assets/image/Deratisation.jpg')} style={styles.image} />
+            </View>
+            <View style={[styles.card, styles.cardElevated]}>
+              <Image source={require('../assets/2-image.jpg')} style={styles.image} />
+            </View>
+          </ScrollView>
+          <TouchableOpacity style={styles.scrollButton} onPress={scrollRight}>
+            <AntDesign name="right" size={20} color="#203165" />
+          </TouchableOpacity>
         </View>
-        <View style={[styles.card, styles.cardElevated]}>
-          <Image source={require('../assets/image/menage.jpg')} style={styles.image} />
-        </View>
-        <View style={[styles.card, styles.cardElevated]}>
-          <Image source={require('../assets/image/plb.jpg')} style={styles.image} />
-        </View>
-        <View style={[styles.card, styles.cardElevated]}>
-          <Image source={require('../assets/image/Deratisation.jpg')} style={styles.image} />
-        </View>
-        <View style={[styles.card, styles.cardElevated]}>
-          <Image source={require('../assets/2-image.jpg')} style={styles.image} />
-        </View>
-        
-      </ScrollView>
-      
       </View>
     </View>
   );
@@ -60,19 +82,37 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 8,
-    borderColor: '#ae97ec',
+    borderColor: '#203165',
     borderWidth: 1,
     borderRadius: 10,
     backgroundColor: '#fff',
   },
+  scrollWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight:-13,
+    marginLeft:-13
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollButton: {
+    padding: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    width: 30,
+    height: 30,
+    marginHorizontal: 5,
+  },
   card: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 85,
+    width: 90,
     height: 80,
     borderRadius: 8,
     margin: 8,
-    marginBottom: 60,
   },
   cardElevated: {
     backgroundColor: '#FFB6C1',

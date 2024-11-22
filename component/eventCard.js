@@ -24,7 +24,7 @@ const EventCard = () => {
           <Image source={require('../assets/image/plb.jpg')} style={styles.image} />
         </View>
         <View style={[styles.card, styles.cardElevated]}>
-          <Image source={require('../assets/2-image.jpg')} style={styles.image} />
+          <Image source={require('../assets/image/Deratisation.jpg')} style={styles.image} />
         </View>
         <View style={[styles.card, styles.cardElevated]}>
           <Image source={require('../assets/2-image.jpg')} style={styles.image} />
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   card: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 90,
+    width: 85,
     height: 80,
     borderRadius: 8,
     margin: 8,
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   },
   cardElevated: {
     backgroundColor: '#FFB6C1',
-    elevation: 4,
+    elevation: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,

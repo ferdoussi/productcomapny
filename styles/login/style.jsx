@@ -8,22 +8,30 @@ const style = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
+  
   title: {
     fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 10,
-    color: '#804390'
+    color: '#203165',
+    
+  },
+  image:{
+    width: 200,
+    height: 150,
+    
   },
   subText: {
     textAlign: 'center',
     marginBottom: 20,
-    color: '#4A90E2'
+    color: '#203165',
+    
   },
   input: {
     width: Platform.OS === 'ios' ? '90%' : '100%', // 90% for iOS, 100% for Android
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#203165',
     borderRadius: 10,
     padding: 10,
     marginBottom: 20,
@@ -37,7 +45,7 @@ const style = StyleSheet.create({
   },
   loginButton: {
     width: Platform.OS === 'ios' ? '70%' : '80%', // 90% for iOS, 100% for Android
-    backgroundColor: '#804390',
+    backgroundColor: '#203165',
     borderRadius: 15,
     padding: 15,
     alignItems: 'center',
@@ -72,9 +80,10 @@ const style = StyleSheet.create({
   rememberMeText: {
     marginLeft: 8,
     fontSize: 16,
+    color:'#203165'
   },
   fingerprintContainer: {
-    backgroundColor: '#804390', // Background color for the icon
+    backgroundColor: '#203165', // Background color for the icon
     borderRadius: 25, // Adjust for a circular shape
     padding: 10, // Padding around the icon
     alignItems: 'center',
@@ -88,7 +97,7 @@ const style = StyleSheet.create({
     justifyContent: 'space-between', // Space between button and icon
     marginTop: 1, // Space above the container
   },
-  
+
 });
 
 export default style;

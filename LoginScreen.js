@@ -22,6 +22,7 @@ import styles from "./styles/login/style.jsx";
 
 const API_LOGIN_ENDPOINT = "http://192.168.100.150:8000/api/login";
 
+
 const LoginScreen = () => {
   const navigation = useNavigation();
   const [snackbarVisible, setSnackbarVisible] = useState(false);
@@ -45,7 +46,7 @@ const LoginScreen = () => {
       } catch (error) {
         console.error("Failed to load credentials:", error);
       }
-    };
+    }; 
 
     loadCredentials();
   }, []);

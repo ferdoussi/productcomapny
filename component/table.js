@@ -39,15 +39,14 @@ const styles = StyleSheet.create({
     padding:10
   },
   table: {
-    marginTop: 20,
+    marginTop:5,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 10,
     borderBottomWidth: 1,
-    borderColor: '#ddd',
-    
+    borderColor: '#ddd',  
   },
   cellHeader: {
     fontWeight: 'bold',

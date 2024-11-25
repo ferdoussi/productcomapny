@@ -2,10 +2,11 @@ import React, { useRef } from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useNavigation } from "@react-navigation/native";
 
 const EventCard = () => {
   const scrollViewRef = useRef(null);
-
+  const navigation = useNavigation();
   const scrollLeft = () => {
     scrollViewRef.current?.scrollTo({ x: 0, animated: true });
   };
@@ -13,14 +14,16 @@ const EventCard = () => {
   const scrollRight = () => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   };
-
+  const handleProdact = () => {
+    navigation.navigate("Home");
+  };
   return (
     <View style={styles.wrapper}>
       <View style={styles.header}>
         <Text style={styles.headingText}>Product:</Text>
         <Text style={styles.showText}>
           All
-          <AntDesign name="arrowright" size={24} color="#203165" />
+          <AntDesign name="arrowright" size={24} color="#203165" onPress={handleProdact} />
         </Text>
       </View>
       <View style={styles.container}>
@@ -61,7 +64,7 @@ const EventCard = () => {
 
 const styles = StyleSheet.create({
   wrapper: {
-    margin: 5,
+    marginBottom: 20,
   },
   header: {
     flexDirection: 'row',

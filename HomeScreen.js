@@ -67,7 +67,7 @@ const Home = () => {
             <Icon name="log-out" size={20} color="#203165" />
             <Text style={styles.menuText}>Logout</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.closeButton} onPress={closeMenu}>
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
@@ -75,33 +75,37 @@ const Home = () => {
       )}
 
       {/* Product List */}
-      <Text style={{fontSize:20,textAlign:'center',marginBottom:5}}>Products:</Text>
-      <FlatList
-        data={products}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            
-            <Image source={item.image} style={styles.image} />
-            <View style={styles.productDetails}>
-              <Text style={styles.productName}>{item.name}</Text>
-              <View style={styles.ratingContainer}>
-                <Text style={styles.ratingText}>{item.note}</Text>
-                <AntDesign name="star" size={18} color="#FBBF46" />
+      <Text style={{ fontSize: 25, textAlign: 'center', marginBottom: 5 ,right:130,color:'#203165' ,fontWeight: 'bold',}}>All Products:</Text>
+
+      {/* Bordered Container for Scroll */}
+      <View style={styles.borderedContainer}>
+        <FlatList
+          data={products}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          contentContainerStyle={styles.listContent} // Apply padding or margin inside the list
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <Image source={item.image} style={styles.image} />
+              <View style={styles.productDetails}>
+                <Text style={styles.productName}>{item.name}</Text>
+                <View style={styles.ratingContainer}>
+                  <Text style={styles.ratingText}>{item.note}</Text>
+                  <AntDesign name="star" size={18} color="#FBBF46" />
+                </View>
+              </View>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity style={styles.addButton} onPress={() => addToMarketplace(item)}>
+                  <Text style={styles.addButtonText}>Add</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.detailsButton}>
+                  <Text style={styles.detailsButtonText}>Show</Text>
+                </TouchableOpacity>
               </View>
             </View>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.addButton} onPress={() => addToMarketplace(item)}>
-                <Text style={styles.addButtonText}>Add</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.detailsButton}>
-                <Text style={styles.detailsButtonText}>Show</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      </View>
     </View>
   );
 };
@@ -196,6 +200,17 @@ const styles = StyleSheet.create({
     color: '#203165',
     fontWeight: '600',
   },
+  borderedContainer: {
+    flex: 1, // Makes the container flexible
+    
+    borderWidth: 1,
+    borderColor: '#203165',
+    borderRadius: 10,
+    overflow: 'hidden', // Ensures content respects border radius
+  },
+  listContent: {
+    padding: 10, // Space around the items inside the list
+  },
   card: {
     flex: 1,
     backgroundColor: '#f9f9f9',
@@ -208,8 +223,8 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   image: {
-    width: 180,
-    height: 170,
+    width: 170,
+    height: 155,
     borderRadius: 10,
   },
   productDetails: {
@@ -222,7 +237,7 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: 15,
     fontWeight: 'bold',
-    paddingLeft:6
+    right:8
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -231,6 +246,7 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 17,
     marginRight: 5,
+    
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -242,7 +258,7 @@ const styles = StyleSheet.create({
   addButton: {
     backgroundColor: '#203165',
     paddingVertical: 8,
-    paddingHorizontal: 20,
+    paddingHorizontal: 2,
     borderRadius: 10,
     flex: 1,
     marginHorizontal: 5,
@@ -251,7 +267,7 @@ const styles = StyleSheet.create({
   detailsButton: {
     backgroundColor: '#FBBF46',
     paddingVertical: 8,
-    paddingHorizontal: 20,
+    paddingHorizontal: 2,
     borderRadius: 10,
     flex: 1,
     marginHorizontal: 5,
@@ -260,12 +276,12 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: '#fff',
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
   detailsButtonText: {
     color: '#203165',
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
 });
 

@@ -3,15 +3,15 @@ import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from 'react
 import Icon from 'react-native-vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useNavigation } from '@react-navigation/native';
-
+import Entypo from '@expo/vector-icons/Entypo';
 const Home = () => {
   const [products] = useState([
-    { id: '1', name: 'Product 1', image: require('./assets/2-image.jpg'), note: '5' },
-    { id: '2', name: 'Product 2', image: require('./assets/2-image.jpg'), note: '5' },
-    { id: '3', name: 'Product 3', image: require('./assets/2-image.jpg'), note: '5' },
-    { id: '4', name: 'Product 4', image: require('./assets/2-image.jpg'), note: '5' },
-    { id: '5', name: 'Product 5', image: require('./assets/2-image.jpg'), note: '5' },
-    { id: '6', name: 'Product 6', image: require('./assets/2-image.jpg'), note: '5' },
+    { id: '1', name: 'Product 1', image: require('./assets/2-image.jpg'), note: '5', prix: '1000' },
+    { id: '2', name: 'Product 2', image: require('./assets/2-image.jpg'), note: '5', prix: '2000' },
+    { id: '3', name: 'Product 3', image: require('./assets/2-image.jpg'), note: '5', prix: '3000' },
+    { id: '4', name: 'Product 4', image: require('./assets/2-image.jpg'), note: '5', prix: '4000' },
+    { id: '5', name: 'Product 5', image: require('./assets/2-image.jpg'), note: '5', prix: '5000' },
+    { id: '6', name: 'Product 6', image: require('./assets/2-image.jpg'), note: '5', prix: '6000' },
   ]);
 
   const [marketplace, setMarketplace] = useState([]);
@@ -34,6 +34,16 @@ const Home = () => {
     navigation.navigate('Login');
   };
 
+  const handleBack = () => {
+    navigation.navigate('ClientHome');
+  };
+  const handleHome = () => {
+    navigation.navigate('ClientHome');
+  };
+  const handleImagePress = (productId) => {
+    navigation.navigate('PageDetails', { id: productId });
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -45,7 +55,10 @@ const Home = () => {
           <TouchableOpacity style={styles.notificationIcon}>
             <Icon name="notifications" size={25} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.marketplaceIcon}>
+          <TouchableOpacity
+            style={styles.marketplaceIcon}
+            onPress={() => navigation.navigate('Marketplace', { marketplace })}
+          >
             <Icon name="cart" size={25} color="#fff" />
             {marketplace.length > 0 && (
               <View style={styles.badge}>
@@ -63,6 +76,10 @@ const Home = () => {
             <Icon name="person" size={20} color="#203165" />
             <Text style={styles.menuText}>Profile</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem} onPress={handleHome}>
+          <Entypo name="home" size={24} color="#203165" />
+            <Text style={styles.menuText}>Home</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
             <Icon name="log-out" size={20} color="#203165" />
             <Text style={styles.menuText}>Logout</Text>
@@ -75,7 +92,15 @@ const Home = () => {
       )}
 
       {/* Product List */}
-      <Text style={{ fontSize: 25, textAlign: 'center', marginBottom: 5 ,right:130,color:'#203165' ,fontWeight: 'bold',}}>All Products:</Text>
+      <View style={{ flexDirection: 'row',paddingTop:20 }}>
+        <Text style={{ fontSize: 25, textAlign: 'center', marginBottom: 5, right: 0, color: '#203165', fontWeight: 'bold' }}>
+          All Products:
+        </Text>
+        <Text style={{ left: 175, fontSize: 25, color: '#203165' }} onPress={handleBack}>
+           <AntDesign name="arrowleft" size={24} color="#203165" />
+          Back
+        </Text>
+      </View>
 
       {/* Bordered Container for Scroll */}
       <View style={styles.borderedContainer}>
@@ -83,10 +108,12 @@ const Home = () => {
           data={products}
           keyExtractor={(item) => item.id}
           numColumns={2}
-          contentContainerStyle={styles.listContent} // Apply padding or margin inside the list
+          contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <Image source={item.image} style={styles.image} />
+              <TouchableOpacity onPress={() => handleImagePress(item.id)}>
+                <Image source={item.image} style={styles.image} />
+              </TouchableOpacity>
               <View style={styles.productDetails}>
                 <Text style={styles.productName}>{item.name}</Text>
                 <View style={styles.ratingContainer}>
@@ -94,6 +121,7 @@ const Home = () => {
                   <AntDesign name="star" size={18} color="#FBBF46" />
                 </View>
               </View>
+              <Text style={{ fontSize: 20, right: 45 }}>{item.prix} DH</Text>
               <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.addButton} onPress={() => addToMarketplace(item)}>
                   <Text style={styles.addButtonText}>Add</Text>
@@ -201,15 +229,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   borderedContainer: {
-    flex: 1, // Makes the container flexible
-    
+    flex: 1,
+    padding: 10,
     borderWidth: 1,
     borderColor: '#203165',
     borderRadius: 10,
-    overflow: 'hidden', // Ensures content respects border radius
+    overflow: 'hidden',
   },
   listContent: {
-    padding: 10, // Space around the items inside the list
+    padding: 10,
   },
   card: {
     flex: 1,
@@ -220,11 +248,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 7,
     shadowOffset: { width: 0, height: 4 },
-    margin: 10,
+    margin: 5,
   },
   image: {
     width: 170,
-    height: 155,
+    height: 150,
     borderRadius: 10,
   },
   productDetails: {
@@ -237,51 +265,41 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: 15,
     fontWeight: 'bold',
-    right:8
+    right: 8,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   ratingText: {
-    fontSize: 17,
+    fontSize: 14,
     marginRight: 5,
-    
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    marginTop: 10,
   },
   addButton: {
-    backgroundColor: '#203165',
-    paddingVertical: 8,
-    paddingHorizontal: 2,
-    borderRadius: 10,
-    flex: 1,
-    marginHorizontal: 5,
-    alignItems: 'center',
-  },
-  detailsButton: {
     backgroundColor: '#FBBF46',
-    paddingVertical: 8,
-    paddingHorizontal: 2,
-    borderRadius: 10,
-    flex: 1,
-    marginHorizontal: 5,
-    alignItems: 'center',
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    borderRadius: 8,
   },
   addButtonText: {
     color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  detailsButton: {
+    backgroundColor: '#203165',
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    borderRadius: 8,
   },
   detailsButtonText: {
-    color: '#203165',
-    fontSize: 12,
-    fontWeight: 'bold',
+    color: '#fff',
+    fontSize: 16,
   },
 });
 

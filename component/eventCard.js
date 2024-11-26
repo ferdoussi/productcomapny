@@ -17,13 +17,17 @@ const EventCard = () => {
   const handleProdact = () => {
     navigation.navigate("Home");
   };
+  const handleImagePress = () => {
+    navigation.navigate('PageDetails');
+  };
+  
   return (
     <View style={styles.wrapper}>
       <View style={styles.header}>
         <Text style={styles.headingText}>Product:</Text>
-        <Text style={styles.showText}>
+        <Text style={styles.showText} onPress={handleProdact} >
           All
-          <AntDesign name="arrowright" size={24} color="#203165" onPress={handleProdact} />
+          <AntDesign name="arrowright" size={24} color="#203165" />
         </Text>
       </View>
       <View style={styles.container}>
@@ -37,21 +41,31 @@ const EventCard = () => {
             style={styles.scrollView}
             showsHorizontalScrollIndicator={false}
           >
-            <View style={[styles.card, styles.cardElevated]}>
-              <Image source={require('../assets/image/elc.jpg')} style={styles.image} />
-            </View>
-            <View style={[styles.card, styles.cardElevated]}>
-              <Image source={require('../assets/image/menage.jpg')} style={styles.image} />
-            </View>
-            <View style={[styles.card, styles.cardElevated]}>
-              <Image source={require('../assets/image/plb.jpg')} style={styles.image} />
-            </View>
-            <View style={[styles.card, styles.cardElevated]}>
-              <Image source={require('../assets/image/Deratisation.jpg')} style={styles.image} />
-            </View>
-            <View style={[styles.card, styles.cardElevated]}>
-              <Image source={require('../assets/2-image.jpg')} style={styles.image} />
-            </View>
+            <TouchableOpacity onPress={() => handleImagePress("Home")}>
+              <View style={[styles.card, styles.cardElevated]}>
+                <Image source={require('../assets/image/elc.jpg')} style={styles.image} />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleImagePress("ProductDetails")}>
+              <View style={[styles.card, styles.cardElevated]}>
+                <Image source={require('../assets/image/menage.jpg')} style={styles.image} />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleImagePress("ProductDetails")}>
+              <View style={[styles.card, styles.cardElevated]}>
+                <Image source={require('../assets/image/plb.jpg')} style={styles.image} />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleImagePress("ProductDetails")}>
+              <View style={[styles.card, styles.cardElevated]}>
+                <Image source={require('../assets/image/Deratisation.jpg')} style={styles.image} />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleImagePress("ProductDetails")}>
+              <View style={[styles.card, styles.cardElevated]}>
+                <Image source={require('../assets/2-image.jpg')} style={styles.image} />
+              </View>
+            </TouchableOpacity>
           </ScrollView>
           <TouchableOpacity style={styles.scrollButton} onPress={scrollRight}>
             <AntDesign name="right" size={20} color="#203165" />
@@ -60,6 +74,7 @@ const EventCard = () => {
       </View>
     </View>
   );
+  
 };
 
 const styles = StyleSheet.create({

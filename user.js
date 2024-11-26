@@ -59,10 +59,6 @@ const User = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const navigation = useNavigation();
 
-  const addToMarketplace = (product) => {
-    setMarketplace([...marketplace, product]);
-  };
-
   const toggleMenu = () => {
     setMenuVisible(!menuVisible);
   };
@@ -86,7 +82,10 @@ const User = () => {
           <TouchableOpacity style={styles.notificationIcon}>
             <Icon name="notifications" size={25} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.marketplaceIcon}>
+          <TouchableOpacity
+            style={styles.marketplaceIcon}
+            onPress={() => navigation.navigate('Marketplace', { marketplace })}
+          >
             <Icon name="cart" size={25} color="#fff" />
             {marketplace.length > 0 && (
               <View style={styles.badge}>
@@ -108,6 +107,7 @@ const User = () => {
             <Icon name="log-out" size={20} color="#203165" />
             <Text style={styles.menuText}>Logout</Text>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.closeButton} onPress={closeMenu}>
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>

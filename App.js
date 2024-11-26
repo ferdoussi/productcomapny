@@ -6,17 +6,20 @@ import LoginScreen from './LoginScreen';
 import Home from './HomeScreen';
 import User from './user'
 import Technicien from './technicien'
+import Marketplace from './component/Marketplace';
+import PageDetails from './component/pageDetails'
 const Stack = createStackNavigator();
-
 const AppNavigator = () => {
 
 
   return (
     <Stack.Navigator>
         <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Login Screen', headerShown: false }} />
-        <Stack.Screen name="Home" component={Home}  options={{ title: 'Login Screen', headerShown: false }}/>
-        <Stack.Screen name="ClientHome" component={User}   options={{ title: 'Login Screen', headerShown: false }}/>
+        <Stack.Screen name="Home" component={Home}  options={{ headerShown: false }}/>
+        <Stack.Screen name="ClientHome" component={User}   options={{ headerShown: false }}/>
         <Stack.Screen name="TechnicienHome" component={Technicien} />
+        <Stack.Screen name="PageDetails" component={PageDetails} />
+        <Stack.Screen name="Marketplace" component={Marketplace} options={{ headerShown: false }}/>
     </Stack.Navigator>
   );
 };

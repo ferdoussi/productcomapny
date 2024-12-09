@@ -96,7 +96,7 @@ const Home = () => {
         <Text style={{ fontSize: 25, textAlign: 'center', marginBottom: 5, right: 0, color: '#203165', fontWeight: 'bold' }}>
           All Products:
         </Text>
-        <Text style={{ left: 175, fontSize: 25, color: '#203165' }} onPress={handleBack}>
+        <Text style={{ left: 175, fontSize: 25, color: '#203165' , fontWeight: 'bold'}} onPress={handleBack}>
            <AntDesign name="arrowleft" size={24} color="#203165" />
           Back
         </Text>
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '##e2e2e2',
   },
   header: {
     flexDirection: 'row',

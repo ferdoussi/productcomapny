@@ -95,7 +95,7 @@ const Marketplace = ({ route }) => {
             <Text style={styles.menuText}>Profile</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem} onPress={handleHome}>
-            <AntDesign name="caretleft" size={24} color="#203165" />
+            <AntDesign name="caretleft" size={22} color="#203165" right={2}/>
             <Text style={styles.menuText}>Products</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
@@ -115,7 +115,7 @@ const Marketplace = ({ route }) => {
           source={require("../assets/logo1.png")} // Add your logo here
           style={styles.logo}
         />
-        <Text style={styles.title}>Demander N°</Text>
+        <Text style={styles.title}>Demande Prestation N°</Text>
       </View>
       <Text style={styles.date}>Ville, le ../../....</Text>
 

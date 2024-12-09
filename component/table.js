@@ -19,13 +19,13 @@ const TableExample = () => {
         <Text style={{color:'orange',width: '30%'}}>Encours</Text>
       </View>
       <View style={styles.row}>
-        <Text style={styles.cell}>1</Text>
+        <Text style={styles.cell}>2</Text>
         <Text style={styles.cell}>Menage,           add</Text>
         <Text style={styles.cell}>1000</Text>
         <Text style={{color:'green',width: '30%',right:10}}>Complete</Text>
       </View>
       <View style={styles.row}>
-        <Text style={styles.cell}>1</Text>
+        <Text style={styles.cell}>3</Text>
         <Text style={styles.cell}>Menage,           add</Text>
         <Text style={styles.cell}>1000</Text>
         <Text style={{color:'red',width: '30%'}}>Refuse</Text>

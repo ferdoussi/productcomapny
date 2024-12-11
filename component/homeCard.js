@@ -2,7 +2,8 @@ import React, { useRef } from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from '@react-navigation/native';
+
 
 const EventCard = () => {
   const scrollViewRef = useRef(null);

@@ -1,6 +1,7 @@
-import React from "react";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
-import { BarChart, LineChart } from "react-native-chart-kit";
+import React from 'react';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { BarChart, LineChart } from 'react-native-chart-kit';
+
 
 const WelcomeScreen = () => {
   

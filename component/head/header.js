@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Header = () => {
-  const [marketplace, setMarketplace] = useState([]);
+  const [marketplace] = useState([]);//
   const [menuVisible, setMenuVisible] = useState(false);
   const navigation = useNavigation();
 
@@ -16,9 +17,24 @@ const Header = () => {
     setMenuVisible(false);
   };
 
-  const handleLogout = () => {
-    navigation.navigate("Login");
+
+
+  const handleLogout = async () => {
+    try {
+      // Remove the authentication token
+      await AsyncStorage.removeItem('authToken');
+      
+      // Navigate to the login screen and clear the navigation stack
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    } catch (error) {
+      console.error("Error removing authToken", error);
+    }
   };
+  
+
 
   return (
     <View style={styles.container}>

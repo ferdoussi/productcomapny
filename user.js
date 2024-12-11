@@ -1,9 +1,9 @@
-import React from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
-import Header from "./component/head/header";
-import EventCard from "./component/eventCard";
-import TableExample from "./component/table";
-import WelcomeScreen from "./component/test";
+import React from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import Header from './component/head/header';
+import EventCard from './component/homeCard';
+import TableExample from './component/table';
+import WelcomeScreen from './component/chart';
 
 const User = () => {
   return (
@@ -22,10 +22,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    backgroundColor: "#fff", // خلفية بيضاء للتطبيق
+    backgroundColor: "#fff", // White background for the app
   },
   scrollContainer: {
-    paddingVertical: 10, // إضافة تباعد عمودي بين العناصر
+    paddingVertical: 10, // Vertical spacing between elements
   },
 });
 

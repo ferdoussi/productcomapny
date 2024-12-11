@@ -17,7 +17,7 @@ import { Snackbar, Checkbox } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as LocalAuthentication from "expo-local-authentication";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import styles from "./styles/login/style.jsx";
+import styles from "./style.jsx";
 
 
 const API_LOGIN_ENDPOINT = "http://192.168.100.150:8000/api/login";
@@ -159,7 +159,7 @@ const LoginScreen = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <Text style={styles.image}>
-          <Image source={require("./assets/logo.png")} style={{borderRadius:100}}/>
+          <Image source={require("../../assets/logo.png")} style={{borderRadius:100}}/>
         </Text>
         <Text style={styles.title}>
           Hey,

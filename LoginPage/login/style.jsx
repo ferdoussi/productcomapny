@@ -1,5 +1,6 @@
-import React from "react";
-import { StyleSheet, Platform } from "react-native";
+import React from 'react';
+import { StyleSheet, Platform } from 'react-native';
+
 
 const style = StyleSheet.create({
   container: {

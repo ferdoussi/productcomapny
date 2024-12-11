@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,12 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import Icon from "react-native-vector-icons/Ionicons";
-import AntDesign from "@expo/vector-icons/AntDesign";
+  Alert
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Marketplace = ({ route }) => {
   const { marketplace } = route.params; // Data comes from previous screen
@@ -30,17 +32,41 @@ const Marketplace = ({ route }) => {
   };
 
   // Handle delete of an item from marketplace
+  
   const handleDelete = (id) => {
-    const updatedMarketplace = marketplaceData.filter((item) => item.id !== id);
-    setMarketplaceData(updatedMarketplace);
+    // Show an alert to confirm deletion
+    Alert.alert(
+      'Delete Item',
+      'Are you sure you want to delete this item?',
+      [
+        { 
+          text: 'NO', 
+          onPress: () => {
+            // Do nothing, just close the alert
+            console.log('Deletion canceled');
+          },
+          style: 'cancel' // Style for the cancel button
+        },
+        { 
+          text: 'YES', 
+          onPress: () => {
+            // Proceed with deletion if OK is pressed
+            const updatedMarketplace = marketplaceData.filter((item) => item.id !== id);
+            setMarketplaceData(updatedMarketplace);
+          },
+          style: 'destructive' // Style for the destructive (red) button
+        }
+      ]
+    );
   };
+  
 
   const [menuVisible, setMenuVisible] = useState(false);
   const navigation = useNavigation();
 
-  const addToMarketplace = (product) => {
-    setMarketplaceData([...marketplaceData, product]);
-  };
+  // const addToMarketplace = (product) => {
+  //   setMarketplaceData([...marketplaceData, product]);
+  // };
 
   const toggleMenu = () => {
     setMenuVisible(!menuVisible);
@@ -50,8 +76,19 @@ const Marketplace = ({ route }) => {
     setMenuVisible(false);
   };
 
-  const handleLogout = () => {
-    navigation.navigate("Login");
+  const handleLogout = async () => {
+    try {
+      // Remove the authentication token
+      await AsyncStorage.removeItem('authToken');
+      
+      // Navigate to the login screen and clear the navigation stack
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    } catch (error) {
+      console.error("Error removing authToken", error);
+    }
   };
 
   const handleHome = () => {

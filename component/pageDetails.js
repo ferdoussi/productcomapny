@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -6,55 +6,88 @@ import {
   Image,
   ScrollView,
   TextInput,
-  Dimensions,
+  Platform,
   TouchableOpacity,
-} from "react-native";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import { getFormatedDate } from "react-native-modern-datepicker";
-import DatePickerModal from "./dateandtime/datePickerModel";
-import Header from "./head/header";
-
-const width = Dimensions.get("window").width;
+} from 'react-native';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { getFormatedDate } from 'react-native-modern-datepicker';
+import Header from './head/header';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const PageDetails = () => {
   const [number, setNumber] = useState("");
-
-  // Date Inputs
-  const today = new Date();
-
-  // First Date Input
-  const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
-  const stratDate = getFormatedDate(
-    new Date(today.setDate(today.getDate() + 1)),
-    "YYYY/MM/DD"
-  );
-  const [startedDate, setStartedDate] = useState("YYYY/MM/DD");
-
-  // Second Date Input
-  const [openEndDatePicker, setOpenEndDatePicker] = useState(false);
-  const [endDate, setEndDate] = useState("YYYY/MM/DD");
-
-  // Third Date Input
-  const [openThirdDatePicker, setOpenThirdDatePicker] = useState(false);
-  const [thirdDate, setThirdDate] = useState("YYYY/MM/DD");
-
-  const handleOnPressStartDate = () => {
-    setOpenStartDatePicker(!openStartDatePicker);
+  
+  // State for the date pickers
+  const [showPicker, setShowPicker] = useState(false);
+  const [pickerMode, setPickerMode] = useState('date'); // 'date' or 'time'
+  const [dateTime1, setDateTime1] = useState(new Date());
+  const [dateTime2, setDateTime2] = useState(new Date());
+  const [dateTime3, setDateTime3] = useState(new Date());
+  
+  const handleChange = (event, selectedDate) => {
+    if (pickerMode === 'date') {
+      // Date picker change
+      if (selectedDate) {
+        const updatedDate = new Date(
+          selectedDate.getFullYear(),
+          selectedDate.getMonth(),
+          selectedDate.getDate(),
+          dateTime1.getHours(),
+          dateTime1.getMinutes()
+        );
+        
+        if (showPicker === 'picker1') {
+          setDateTime1(updatedDate);
+        } else if (showPicker === 'picker2') {
+          setDateTime2(updatedDate);
+        } else if (showPicker === 'picker3') {
+          setDateTime3(updatedDate);
+        }
+        setPickerMode('time'); // Switch to time picker
+        setShowPicker(true); // Show time picker
+      } else {
+        setShowPicker(false);
+      }
+    } else if (pickerMode === 'time') {
+      // Time picker change
+      if (selectedDate) {
+        const updatedTime = new Date(
+          dateTime1.getFullYear(),
+          dateTime1.getMonth(),
+          dateTime1.getDate(),
+          selectedDate.getHours(),
+          selectedDate.getMinutes()
+        );
+        
+        if (showPicker === 'picker1') {
+          setDateTime1(updatedTime);
+        } else if (showPicker === 'picker2') {
+          setDateTime2(updatedTime);
+        } else if (showPicker === 'picker3') {
+          setDateTime3(updatedTime);
+        }
+      }
+      setShowPicker(false); // Close picker
+    }
   };
 
-  const handleOnPressEndDate = () => {
-    setOpenEndDatePicker(!openEndDatePicker);
-  };
-
-  const handleOnPressThirdDate = () => {
-    setOpenThirdDatePicker(!openThirdDatePicker);
+  const formatDateTime = (date) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+    return `${date.toLocaleDateString(undefined, options)} ${date.toLocaleTimeString(undefined, timeOptions)}`;
   };
 
   return (
     <View style={styles.screen}>
       <Header />
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title1}>Prestaion:</Text>
+        <View style={{flexDirection:'row'}}>
+          <Text style={styles.title1}>Prestaion :</Text>
+          <Text style={styles.back1}>
+            <AntDesign name="arrowleft" size={24} color="#203165" />
+            Back
+          </Text>
+        </View>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Image
             source={require("../assets/image/menage.jpg")}
@@ -65,18 +98,16 @@ const PageDetails = () => {
             <Text style={styles.title}>1000dh</Text>
           </View>
         </View>
+
         <Text style={styles.descriptionLabel}>Description:</Text>
         <Text style={styles.descriptionText}>
           A house cleaner is a professional who specializes in maintaining the
           cleanliness and organization of residential spaces. Their
           responsibilities typically include tasks like dusting, vacuuming,
           mopping floors, sanitizing bathrooms and kitchens, tidying up rooms,
-          and sometimes handling laundry or dishwashing. House cleaners can
-          work independently or for cleaning companies and often tailor their
-          services to meet specific client needs, offering one-time, regular, or
-          deep-cleaning solutions. Their role is essential in ensuring homes
-          remain hygienic, comfortable, and inviting.
+          and sometimes handling laundry or dishwashing.
         </Text>
+
         <View style={styles.row}>
           <Text style={styles.label}>Surface:</Text>
           <TextInput
@@ -88,61 +119,48 @@ const PageDetails = () => {
           />
           <Text style={styles.label}> M² </Text>
         </View>
-        <Text style={styles.descriptionLabel}>Date:</Text>
 
-        {/* First Date Input */}
-        <View style={{ width: width - 32 }}>
-          <TouchableOpacity
-            style={styles.inputBtn}
-            onPress={handleOnPressStartDate}
-          >
-            <Text style={{ fontSize: 14, color: "#BDBDBD" }}>{startedDate}</Text>
-            <AntDesign name="calendar" size={24} color="#203165" />
-          </TouchableOpacity>
-          <DatePickerModal
-            open={openStartDatePicker}
-            startDate={stratDate}
-            selectedDate={startedDate}
-            onclose={() => setOpenStartDatePicker(false)}
-            onchangeStartDate={(date) => setStartedDate(date)}
-          />
-        </View>
+        {/* Date Inputs */}
+        <Text style={styles.descriptionLabel}>Select Date & time :</Text>
+        <TouchableOpacity
+          style={styles.inputButton}
+          onPress={() => {
+            setPickerMode('date');
+            setShowPicker('picker1');
+          }}
+        >
+          <Text style={styles.inputText}>{formatDateTime(dateTime1)}</Text>
+        </TouchableOpacity>
 
-        {/* Second Date Input */}
-        <View style={{ width: width - 32, marginTop: 20 }}>
-          <TouchableOpacity
-            style={styles.inputBtn}
-            onPress={handleOnPressEndDate}
-          >
-            <Text style={{ fontSize: 14, color: "#BDBDBD" }}>{endDate}</Text>
-            <AntDesign name="calendar" size={24} color="#203165" />
-          </TouchableOpacity>
-          <DatePickerModal
-            open={openEndDatePicker}
-            startDate={endDate}
-            selectedDate={endDate}
-            onclose={() => setOpenEndDatePicker(false)}
-            onchangeStartDate={(date) => setEndDate(date)}
-          />
-        </View>
+        <TouchableOpacity
+          style={styles.inputButton}
+          onPress={() => {
+            setPickerMode('date');
+            setShowPicker('picker2');
+          }}
+        >
+          <Text style={styles.inputText}>{formatDateTime(dateTime2)}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.inputButton}
+          onPress={() => {
+            setPickerMode('date');
+            setShowPicker('picker3');
+          }}
+        >
+          <Text style={styles.inputText}>{formatDateTime(dateTime3)}</Text>
+        </TouchableOpacity>
 
-        {/* Third Date Input */}
-        <View style={{ width: width - 32, marginTop: 20 }}>
-          <TouchableOpacity
-            style={styles.inputBtn}
-            onPress={handleOnPressThirdDate}
-          >
-            <Text style={{ fontSize: 14, color: "#BDBDBD" }}>{thirdDate}</Text>
-            <AntDesign name="calendar" size={24} color="#203165" />
-          </TouchableOpacity>
-          <DatePickerModal
-            open={openThirdDatePicker}
-            startDate={thirdDate}
-            selectedDate={thirdDate}
-            onclose={() => setOpenThirdDatePicker(false)}
-            onchangeStartDate={(date) => setThirdDate(date)}
+        {showPicker && (
+          <DateTimePicker
+            value={showPicker === 'picker1' ? dateTime1 : showPicker === 'picker2' ? dateTime2 : dateTime3}
+            mode={pickerMode} // 'date' or 'time'
+            is24Hour={true}
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={handleChange}
           />
-        </View>
+        )}
+
         <TouchableOpacity style={styles.valider}>
           <Text style={styles.validerText}>Valider</Text>
         </TouchableOpacity>
@@ -152,11 +170,12 @@ const PageDetails = () => {
 };
 
 const styles = StyleSheet.create({
+  // Same styles as before
   screen: {
     flex: 1,
   },
   container: {
-    paddingHorizontal: 14, // حذف التباعد العمودي الزائد
+    paddingHorizontal: 14,
     alignItems: "center",
   },
   image: {
@@ -167,12 +186,11 @@ const styles = StyleSheet.create({
     right: 70,
   },
   title1: {
-    marginTop: 0, // حذف الفراغ العلوي
+    marginTop: 0,
     marginBottom: 25,
-    right: 140,
+    right: 100,
     fontSize: 24,
     fontWeight: "bold",
-    textDecorationLine: "underline",
     color: "#203165",
   },
   title: {
@@ -211,33 +229,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     flex: 1,
   },
-  inputBtn: {
+  inputButton: {
     borderWidth: 1,
+    borderColor: '#203165',
     borderRadius: 12,
-    borderColor: "#203165",
-    height: 50,
-    paddingLeft: 8,
-    fontSize: 18,
-    backgroundColor: "#FAFAFA",
-    justifyContent: "space-between",
-    marginTop: 4,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingRight: 8,
-    width: "98%",
+    padding: 5,
+    width: 200,
+    backgroundColor: '#FAFAFA',
+    alignItems: 'center',
+    right:100,
+    height:30,
+    margin:10
+  },
+  inputText: {
+    fontSize: 12,
+    color: '#333',
   },
   valider: {
     backgroundColor: "#FBBF46",
-    width: "70%",
+    width: "40%",
     height: 50,
     margin: 20,
     borderRadius: 15,
+    left:100
   },
   validerText: {
     color: "#203165",
     textAlign: "center",
     margin: 10,
     fontSize: 22,
+  },
+  back1: {
+    left: 100,
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#203165",
   },
 });
 

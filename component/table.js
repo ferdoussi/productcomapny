@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 
+
 const TableExample = () => {
   return (
     <ScrollView style={styles.table}>
@@ -50,11 +51,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 10,
     borderBottomWidth: 1,
-    borderColor: '#ddd',  
+    borderColor: '#203165',  
+  
   },
   cellHeader: {
     fontWeight: 'bold',
     width: '30%',
+      borderRightColor:'red'
   },
   cell: {
     width: '30%',

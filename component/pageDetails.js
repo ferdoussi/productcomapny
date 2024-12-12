@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,81 +8,113 @@ import {
   TextInput,
   Platform,
   TouchableOpacity,
-} from 'react-native';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import { getFormatedDate } from 'react-native-modern-datepicker';
-import Header from './head/header';
-import DateTimePicker from '@react-native-community/datetimepicker';
+} from "react-native";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { getFormatedDate } from "react-native-modern-datepicker";
+import Header from "./head/header";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const PageDetails = () => {
   const [number, setNumber] = useState("");
-  
+
   // State for the date pickers
-  const [showPicker, setShowPicker] = useState(false);
-  const [pickerMode, setPickerMode] = useState('date'); // 'date' or 'time'
+  const [showPicker, setShowPicker] = useState(""); // Store picker ID (e.g., 'picker1')
+  const [pickerMode, setPickerMode] = useState("date"); // 'date' or 'time'
   const [dateTime1, setDateTime1] = useState(new Date());
   const [dateTime2, setDateTime2] = useState(new Date());
   const [dateTime3, setDateTime3] = useState(new Date());
-  
+  const [dateTime4, setDateTime4] = useState(new Date()); // Added fourth date
+
   const handleChange = (event, selectedDate) => {
-    if (pickerMode === 'date') {
-      // Date picker change
-      if (selectedDate) {
-        const updatedDate = new Date(
-          selectedDate.getFullYear(),
-          selectedDate.getMonth(),
-          selectedDate.getDate(),
-          dateTime1.getHours(),
-          dateTime1.getMinutes()
-        );
-        
-        if (showPicker === 'picker1') {
-          setDateTime1(updatedDate);
-        } else if (showPicker === 'picker2') {
-          setDateTime2(updatedDate);
-        } else if (showPicker === 'picker3') {
-          setDateTime3(updatedDate);
-        }
-        setPickerMode('time'); // Switch to time picker
-        setShowPicker(true); // Show time picker
-      } else {
-        setShowPicker(false);
+    if (!selectedDate) {
+      setShowPicker(""); // Close the picker when no date is selected
+      return;
+    }
+
+    // Adjust to handle date and time correctly
+    const updatedDate = new Date(selectedDate);
+
+    if (pickerMode === "date") {
+      const currentDateTime =
+        showPicker === "picker1"
+          ? dateTime1
+          : showPicker === "picker2"
+          ? dateTime2
+          : showPicker === "picker3"
+          ? dateTime3
+          : dateTime4; // Added condition for picker4
+
+      // Update the date but keep the current hour and minute
+      const newDateTime = new Date(
+        updatedDate.getFullYear(),
+        updatedDate.getMonth(),
+        updatedDate.getDate(),
+        currentDateTime.getHours(), // retain the current hour
+        currentDateTime.getMinutes() // retain the current minute
+      );
+
+      if (showPicker === "picker1") {
+        setDateTime1(newDateTime);
+      } else if (showPicker === "picker2") {
+        setDateTime2(newDateTime);
+      } else if (showPicker === "picker3") {
+        setDateTime3(newDateTime);
+      } else if (showPicker === "picker4") {
+        setDateTime4(newDateTime); // Added fourth date update
       }
-    } else if (pickerMode === 'time') {
-      // Time picker change
-      if (selectedDate) {
-        const updatedTime = new Date(
-          dateTime1.getFullYear(),
-          dateTime1.getMonth(),
-          dateTime1.getDate(),
-          selectedDate.getHours(),
-          selectedDate.getMinutes()
-        );
-        
-        if (showPicker === 'picker1') {
-          setDateTime1(updatedTime);
-        } else if (showPicker === 'picker2') {
-          setDateTime2(updatedTime);
-        } else if (showPicker === 'picker3') {
-          setDateTime3(updatedTime);
-        }
+
+      setPickerMode("time"); // switch to time mode
+      setShowPicker(showPicker); // show the time picker for the selected picker
+    } else if (pickerMode === "time") {
+      const currentDateTime =
+        showPicker === "picker1"
+          ? dateTime1
+          : showPicker === "picker2"
+          ? dateTime2
+          : showPicker === "picker3"
+          ? dateTime3
+          : dateTime4; // Added condition for picker4
+
+      // Update the time with the selected hours and minutes
+      const newDateTime = new Date(
+        currentDateTime.getFullYear(),
+        currentDateTime.getMonth(),
+        currentDateTime.getDate(),
+        updatedDate.getHours(), // set the selected hour
+        updatedDate.getMinutes() // set the selected minute
+      );
+
+      if (showPicker === "picker1") {
+        setDateTime1(newDateTime);
+      } else if (showPicker === "picker2") {
+        setDateTime2(newDateTime);
+      } else if (showPicker === "picker3") {
+        setDateTime3(newDateTime);
+      } else if (showPicker === "picker4") {
+        setDateTime4(newDateTime); // Added fourth date time update
       }
-      setShowPicker(false); // Close picker
+
+      setShowPicker(""); // hide the picker after time selection
     }
   };
 
   const formatDateTime = (date) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    const timeOptions = { hour: '2-digit', minute: '2-digit' };
-    return `${date.toLocaleDateString(undefined, options)} ${date.toLocaleTimeString(undefined, timeOptions)}`;
+    const options = { year: "numeric", month: "short", day: "numeric" };
+    const timeOptions = { hour: "2-digit", minute: "2-digit" };
+
+    // Formatting date and time
+    const dateFormatted = date.toLocaleDateString(undefined, options);
+    const timeFormatted = date.toLocaleTimeString(undefined, timeOptions);
+
+    return `${dateFormatted} ${timeFormatted}`;
   };
 
   return (
     <View style={styles.screen}>
       <Header />
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={{flexDirection:'row'}}>
-          <Text style={styles.title1}>Prestaion :</Text>
+        <View style={{ flexDirection: "row" }}>
+          <Text style={styles.title1}>Prestation :</Text>
           <Text style={styles.back1}>
             <AntDesign name="arrowleft" size={24} color="#203165" />
             Back
@@ -110,53 +142,76 @@ const PageDetails = () => {
 
         <View style={styles.row}>
           <Text style={styles.label}>Surface:</Text>
+          {/* input number for surface  */}
           <TextInput
             style={styles.inputInline}
             placeholder="Type a surface..."
             keyboardType="numeric"
             value={number}
-            onChangeText={(text) => setNumber(text.replace(/[^0-9]/g, ""))}
+            onChangeText={(text) => setNumber(text.replace(/[^0-9.]/g, ""))} 
           />
           <Text style={styles.label}> M² </Text>
         </View>
 
         {/* Date Inputs */}
         <Text style={styles.descriptionLabel}>Select Date & time :</Text>
-        <TouchableOpacity
-          style={styles.inputButton}
-          onPress={() => {
-            setPickerMode('date');
-            setShowPicker('picker1');
-          }}
-        >
-          <Text style={styles.inputText}>{formatDateTime(dateTime1)}</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row" }}>
+          <TouchableOpacity
+            style={styles.inputButton}
+            onPress={() => {
+              setPickerMode("date");
+              setShowPicker("picker1");
+            }}
+          >
+            <Text style={styles.inputText}>{formatDateTime(dateTime1)}</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.inputButton}
-          onPress={() => {
-            setPickerMode('date');
-            setShowPicker('picker2');
-          }}
-        >
-          <Text style={styles.inputText}>{formatDateTime(dateTime2)}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.inputButton}
-          onPress={() => {
-            setPickerMode('date');
-            setShowPicker('picker3');
-          }}
-        >
-          <Text style={styles.inputText}>{formatDateTime(dateTime3)}</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.inputButton}
+            onPress={() => {
+              setPickerMode("date");
+              setShowPicker("picker2");
+            }}
+          >
+            <Text style={styles.inputText}>{formatDateTime(dateTime2)}</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{flexDirection:'row'}}>
+          <TouchableOpacity
+            style={styles.inputButton}
+            onPress={() => {
+              setPickerMode("date");
+              setShowPicker("picker3");
+            }}
+          >
+            <Text style={styles.inputText}>{formatDateTime(dateTime3)}</Text>
+          </TouchableOpacity>
 
+          {/* New Fourth Date Input */}
+          <TouchableOpacity
+            style={styles.inputButton}
+            onPress={() => {
+              setPickerMode("date");
+              setShowPicker("picker4");
+            }}
+          >
+            <Text style={styles.inputText}>{formatDateTime(dateTime4)}</Text>
+          </TouchableOpacity>
+        </View>
         {showPicker && (
           <DateTimePicker
-            value={showPicker === 'picker1' ? dateTime1 : showPicker === 'picker2' ? dateTime2 : dateTime3}
+            value={
+              showPicker === "picker1"
+                ? dateTime1
+                : showPicker === "picker2"
+                ? dateTime2
+                : showPicker === "picker3"
+                ? dateTime3
+                : dateTime4
+            }
             mode={pickerMode} // 'date' or 'time'
             is24Hour={true}
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            display={Platform.OS === "ios" ? "spinner" : "default"}
             onChange={handleChange}
           />
         )}
@@ -170,7 +225,6 @@ const PageDetails = () => {
 };
 
 const styles = StyleSheet.create({
-  // Same styles as before
   screen: {
     flex: 1,
   },
@@ -183,15 +237,16 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 10,
     marginBottom: 20,
-    right: 70,
+    marginRight: 70, // Updated from `right: 70`
   },
   title1: {
     marginTop: 0,
     marginBottom: 25,
-    right: 100,
+    marginRight: 100, // Changed `right` to `marginRight`
     fontSize: 24,
     fontWeight: "bold",
     color: "#203165",
+    paddingTop: 15, // Changed `top` to `paddingTop`
   },
   title: {
     fontSize: 24,
@@ -231,27 +286,27 @@ const styles = StyleSheet.create({
   },
   inputButton: {
     borderWidth: 1,
-    borderColor: '#203165',
+    borderColor: "#203165",
     borderRadius: 12,
     padding: 5,
-    width: 200,
-    backgroundColor: '#FAFAFA',
-    alignItems: 'center',
-    right:100,
-    height:30,
-    margin:10
+    width: 190,
+    backgroundColor: "#FAFAFA",
+    alignItems: "center",
+    height: 30,
+    margin: 10,
   },
   inputText: {
     fontSize: 12,
-    color: '#333',
+    color: "#333",
   },
   valider: {
     backgroundColor: "#FBBF46",
     width: "40%",
     height: 50,
-    margin: 20,
+    marginHorizontal: 40, // Updated from `margin: 40`
     borderRadius: 15,
-    left:100
+    alignSelf: 'center', // Added to center the button horizontally
+    top:15
   },
   validerText: {
     color: "#203165",
@@ -260,10 +315,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
   back1: {
-    left: 100,
+    marginLeft: 100, // Changed from `left: 100`
     fontSize: 24,
     fontWeight: "bold",
     color: "#203165",
+    paddingTop: 15, // Changed `top` to `paddingTop`
   },
 });
 

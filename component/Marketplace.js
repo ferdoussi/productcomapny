@@ -170,8 +170,8 @@ const Marketplace = ({ route }) => {
         <View style={styles.tableHeader}>
           <Text style={styles.tableHeaderCell}>Description</Text>
           <Text style={styles.tableHeaderCell}>Prix Unitaire</Text>
-          <Text style={styles.tableHeaderCell}>Quantité</Text>
-          <Text style={styles.tableHeaderCell}>Montant HT</Text>
+          <Text style={styles.tableHeaderCell}>Les Dates</Text>
+          <Text style={styles.tableHeaderCell}>Localisation</Text>
           <Text style={styles.tableHeaderCell}>Action</Text>
         </View>
         <FlatList
@@ -181,8 +181,8 @@ const Marketplace = ({ route }) => {
             <View style={styles.tableRow}>
               <Text style={styles.tableCell}>{item.name}</Text>
               <Text style={styles.tableCell}>{item.prix} DH</Text>
-              <Text style={styles.tableCell}>1</Text>
-              <Text style={styles.tableCell}>{item.prix} DH</Text>
+              <Text style={styles.tableCell}> 3* 20/12/2024</Text>
+              <Text style={styles.tableCell}>abdelmoumen </Text>
               <Text style={styles.tableCell}>
                 <TouchableOpacity
                   style={{ flexDirection: "row" }}

@@ -10,13 +10,13 @@ import {
   TouchableOpacity,
 } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { getFormatedDate } from "react-native-modern-datepicker";
+
 import Header from "./head/header";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 const PageDetails = () => {
   const [number, setNumber] = useState("");
-
+  const [text, setText] = useState("");
   // State for the date pickers
   const [showPicker, setShowPicker] = useState(""); // Store picker ID (e.g., 'picker1')
   const [pickerMode, setPickerMode] = useState("date"); // 'date' or 'time'
@@ -148,7 +148,7 @@ const PageDetails = () => {
             placeholder="Type a surface..."
             keyboardType="numeric"
             value={number}
-            onChangeText={(text) => setNumber(text.replace(/[^0-9.]/g, ""))} 
+            onChangeText={(text) => setNumber(text.replace(/[^0-9.]/g, ""))}
           />
           <Text style={styles.label}> M² </Text>
         </View>
@@ -176,7 +176,7 @@ const PageDetails = () => {
             <Text style={styles.inputText}>{formatDateTime(dateTime2)}</Text>
           </TouchableOpacity>
         </View>
-        <View style={{flexDirection:'row'}}>
+        <View style={{ flexDirection: "row" }}>
           <TouchableOpacity
             style={styles.inputButton}
             onPress={() => {
@@ -215,7 +215,13 @@ const PageDetails = () => {
             onChange={handleChange}
           />
         )}
-
+        <Text style={styles.descriptionLabel}>Select Location :</Text>
+        <TextInput
+         style={styles.TextInput}
+          placeholder="Type your location "
+          onChangeText={(newText) => setText(newText)}
+          defaultValue={text}
+        />
         <TouchableOpacity style={styles.valider}>
           <Text style={styles.validerText}>Valider</Text>
         </TouchableOpacity>
@@ -284,6 +290,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     flex: 1,
   },
+  TextInput:{
+    borderWidth: 1,
+    borderColor: "#203165",
+    borderRadius: 12,
+    padding: 5,
+    width: '80%',
+    backgroundColor: "#FAFAFA",
+    margin: 10,
+    right:43
+  },
   inputButton: {
     borderWidth: 1,
     borderColor: "#203165",
@@ -305,8 +321,8 @@ const styles = StyleSheet.create({
     height: 50,
     marginHorizontal: 40, // Updated from `margin: 40`
     borderRadius: 15,
-    alignSelf: 'center', // Added to center the button horizontally
-    top:15
+    alignSelf: "center", // Added to center the button horizontally
+    top: 15,
   },
   validerText: {
     color: "#203165",

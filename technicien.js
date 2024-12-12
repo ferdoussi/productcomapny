@@ -4,15 +4,19 @@ import {
   Text,
   StyleSheet,
   Image,
-  TextInput,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import Header from "./component/head/header";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Icon from "react-native-vector-icons/Feather";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import moment from "moment";
 
 const Technicien = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(""); // Date selected by user
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false); // To show date picker
+  const [selectedDate, setSelectedDate] = useState(null); // Store selected date
 
   // Array of items to be mapped
   const items = [
@@ -42,60 +46,92 @@ const Technicien = () => {
     },
     {
       id: 4,
-      date: "14/12/2024 | 10:00AM-12:00PM",
+      date: "12/12/2024 | 10:00AM-12:00PM",
       title: "Menage",
       price: "800DH",
-      surface: "10M²",
+      surface: "60M²",
       address: "20 Ave Mohammed VI, Casablanca 20300",
     },
   ];
+
+  // Function to filter items based on the selected date
+  const filteredItems = searchQuery
+    ? items.filter((item) => {
+        const itemDate = item.date.split(" | ")[0]; // Extract the date portion
+        return itemDate === searchQuery; // Compare with the selected date
+      })
+    : items; // Show all items if no date is selected
+
+  // Show date picker
+  const showDatePicker = () => setDatePickerVisibility(true);
+
+  // Hide date picker
+  const hideDatePicker = () => setDatePickerVisibility(false);
+
+  // Handle date selection
+  const handleConfirm = (date) => {
+    const formattedDate = moment(date).format("DD/MM/YYYY"); // Format date to DD/MM/YYYY
+    setSelectedDate(formattedDate);
+    setSearchQuery(formattedDate); // Update search query with the selected date
+    hideDatePicker();
+  };
+  const showfile = ()=>{
+    alert('not fond')
+  }
 
   return (
     <View style={styles.screen}>
       <Header />
 
-      {/* Search bar */}
+      {/* Date Picker Button */}
       <View style={styles.searchContainer}>
-        <Icon name="search" size={20} color="#555" style={styles.icon} />
-        <TextInput
-          style={styles.textInput}
-          placeholder="Search..."
-          placeholderTextColor="#aaa"
-          value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)} // Update search query
-        />
+        <TouchableOpacity onPress={showDatePicker} style={styles.dateButton}>
+          <Text style={styles.dateButtonText}>
+            {selectedDate ? selectedDate : "Select Date"}
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      {/* List of items */}
+      {/* Date Picker Modal */}
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+      />
+
+      {/* List of filtered items */}
       <ScrollView contentContainerStyle={styles.cardsWrapper}>
-        {items.map((item, index) => (
-          <View
-            key={item.id}
-            style={[
-              styles.cardContainer,
-              {
-                backgroundColor: index % 2 === 0 ? "#203165" : "#2C4A74", // Alternate color based on index
-              },
-            ]}
-          >
-            <Image
-              source={require("./assets/logo1.png")}
-              style={styles.image}
-            />
-            <View style={styles.infoContainer}>
-              <Text style={styles.file}>
-                <AntDesign name="eyeo" size={24} color="black" />
-              </Text>
-              <Text style={styles.title}>{item.date}</Text>
-              <Text style={styles.subtitle}>{item.title}</Text>
-              <Text style={styles.subtitle}>Prix : {item.price}</Text>
-              <Text style={styles.detailsText}>Surface : {item.surface}</Text>
-              <View style={styles.detailsContainer}>
-                <Text style={styles.detailsText}>{item.address}</Text>
+        {filteredItems.length > 0 ? (
+          filteredItems.map((item, index) => (
+            <View
+              key={item.id}
+              style={[
+                styles.cardContainer,
+                {
+                  backgroundColor:
+                    index % 2 === 0 ? "#203165" : "#2C4A74", // Alternate color based on index
+                },
+              ]}
+            >
+              <Image source={require("./assets/logo1.png")} style={styles.image} />
+              <View style={styles.infoContainer}>
+                <Text style={styles.file}>
+                  <AntDesign name="eyeo" size={24} color="black" onPress={showfile} />
+                </Text>
+                <Text style={styles.title}>{item.date}</Text>
+                <Text style={styles.subtitle}>{item.title}</Text>
+                <Text style={styles.subtitle}>Prix : {item.price}</Text>
+                <Text style={styles.detailsText}>Surface : {item.surface}</Text>
+                <View style={styles.detailsContainer}>
+                  <Text style={styles.detailsText}>{item.address}</Text>
+                </View>
               </View>
             </View>
-          </View>
-        ))}
+          ))
+        ) : (
+          <Text style={styles.noResultsText}>No results found</Text>
+        )}
       </ScrollView>
     </View>
   );
@@ -106,27 +142,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardsWrapper: {
-    paddingBottom: 20, // Add padding to the bottom
+    paddingBottom: 20,
   },
   cardContainer: {
     flexDirection: "row",
     borderRadius: 15,
     margin: 10,
     overflow: "hidden",
-    elevation: 5, // Adds shadow for Android
+    elevation: 5,
     height: 170,
     alignSelf: "center",
     backgroundColor: "transparent",
     marginTop: 20,
-    shadowColor: "#000", // Shadow color
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 4,
     },
-    shadowOpacity: 0.1, // Adjust opacity of the shadow
-    shadowRadius: 6, // Radius of the shadow spread
-
-    // Elevation for Android (adds shadow on Android)
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
     elevation: 5,
   },
   image: {
@@ -163,7 +197,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 1,
     borderRadius: 15,
-    top:130
+    top: 130,
   },
   searchContainer: {
     flexDirection: "row",
@@ -180,14 +214,24 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: 15,
   },
-  icon: {
-    marginRight: 10,
+  dateButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: "#FAFAFA",
+    borderRadius: 20,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  textInput: {
-    flex: 1,
-    height: "100%",
+  dateButtonText: {
     fontSize: 16,
-    color: "#333",
+    color: "#203165",
+  },
+  noResultsText: {
+    fontSize: 18,
+    color: "gray",
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 

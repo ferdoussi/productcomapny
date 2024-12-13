@@ -225,6 +225,7 @@ const PageDetails = () => {
         <TouchableOpacity style={styles.valider}>
           <Text style={styles.validerText}>Valider</Text>
         </TouchableOpacity>
+        
       </ScrollView>
     </View>
   );
@@ -291,14 +292,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   TextInput:{
-    borderWidth: 1,
+    height: 100,
+    width:'100%',  // You can adjust the height as needed
     borderColor: "#203165",
-    borderRadius: 12,
-    padding: 5,
-    width: '80%',
-    backgroundColor: "#FAFAFA",
-    margin: 10,
-    right:43
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 15,
+    textAlignVertical: "top",
   },
   inputButton: {
     borderWidth: 1,
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 40, // Updated from `margin: 40`
     borderRadius: 15,
     alignSelf: "center", // Added to center the button horizontally
-    top: 15,
+    top: 10,
   },
   validerText: {
     color: "#203165",

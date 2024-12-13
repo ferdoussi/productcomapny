@@ -6,6 +6,8 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
+  Modal,
+  TextInput,
 } from "react-native";
 import Header from "./component/head/header";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -17,7 +19,12 @@ const Technicien = () => {
   const [searchQuery, setSearchQuery] = useState(""); // Date selected by user
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false); // To show date picker
   const [selectedDate, setSelectedDate] = useState(null); // Store selected date
-
+  // modal
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [text, setText] = useState(""); // Store the input text
+  // change prix
+  const [number, setNumber] = useState("");
   // Array of items to be mapped
   const items = [
     {
@@ -75,10 +82,16 @@ const Technicien = () => {
     setSearchQuery(formattedDate); // Update search query with the selected date
     hideDatePicker();
   };
-  const showfile = ()=>{
-    alert('not fond')
-  }
 
+  const getRandomColor = () => {
+    const colors = ["#203165", "#2C4A74", "#1F2C3B", "#263340", "#2A3D54"];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
+  const calculateTotalPrice = (originalPrice, addedPrice) => {
+    const originalPriceNumeric = parseFloat(originalPrice.replace('DH', '').trim());
+    const addedPriceNumeric = parseFloat(addedPrice || 0);
+    return originalPriceNumeric + addedPriceNumeric;
+  };
   return (
     <View style={styles.screen}>
       <Header />
@@ -109,15 +122,25 @@ const Technicien = () => {
               style={[
                 styles.cardContainer,
                 {
-                  backgroundColor:
-                    index % 2 === 0 ? "#203165" : "#2C4A74", // Alternate color based on index
+                  backgroundColor: getRandomColor(), // Random color for each item
                 },
               ]}
             >
-              <Image source={require("./assets/logo1.png")} style={styles.image} />
+              <Image
+                source={require("./assets/logo1.png")}
+                style={styles.image}
+              />
               <View style={styles.infoContainer}>
                 <Text style={styles.file}>
-                  <AntDesign name="eyeo" size={24} color="black" onPress={showfile} />
+                  <AntDesign
+                    name="eyeo"
+                    size={24}
+                    color="black"
+                    onPress={() => {
+                      setSelectedItem(item); // Stocke l'élément sélectionné
+                      setModalVisible(true); // Ouvre le modal
+                    }}
+                  />
                 </Text>
                 <Text style={styles.title}>{item.date}</Text>
                 <Text style={styles.subtitle}>{item.title}</Text>
@@ -127,6 +150,80 @@ const Technicien = () => {
                   <Text style={styles.detailsText}>{item.address}</Text>
                 </View>
               </View>
+              {/* modal */}
+            {/* Modal for item details */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>
+            <Text style={{fontWeight:'bold',fontSize:20,color:'#203165'}}>Address :</Text> {selectedItem ? ` ${selectedItem.address}` : "Aucun élément sélectionné"}
+            </Text>
+            <Text style={styles.modalText}>
+            <Text style={{fontWeight:'bold',fontSize:20,color:'#203165'}}>Title :</Text> {selectedItem ? ` ${selectedItem.title}` : "Aucun élément sélectionné"}
+            </Text>
+            <Text style={styles.modalText}>
+            <Text style={{fontWeight:'bold',fontSize:20,color:'#203165'}}>Surface :</Text> {selectedItem ? ` ${selectedItem.surface}` : "Aucun élément sélectionné"}
+            </Text>
+            <Text style={styles.modalText}>
+              <Text style={{fontWeight:'bold',fontSize:20,color:'#203165'}}>Prix :</Text> {selectedItem ? ` ${selectedItem.price}` : "Aucun élément sélectionné"}
+            </Text>
+
+            {/* Input to update price */}
+            <Text style={styles.textChange}>Update Price:</Text>
+            <Text style={styles.modalText}>
+              {selectedItem ? (
+                <TextInput
+                  style={styles.inputInline}
+                  placeholder="Add price..."
+                  keyboardType="numeric"
+                  value={number}
+                  onChangeText={(text) => setNumber(text.replace(/[^0-9.]/g, ""))}
+                />
+              ) : null}
+            </Text>
+
+            {/* Input to add description */}
+            <Text style={styles.textChange}>Add Description:</Text>
+            <Text style={styles.modalText}>
+              {selectedItem ? (
+                <TextInput
+                  style={styles.textArea}
+                  placeholder="Add description..."
+                  multiline
+                  numberOfLines={4}
+                  value={text}
+                  onChangeText={(newText) => setText(newText)}
+                />
+              ) : null}
+            </Text>
+
+            {/* Display total price */}
+            <Text style={styles.totle}>
+              <Text style={{color:'#FBBF46'}}>Total:{" "}</Text>
+              {selectedItem ? `${calculateTotalPrice(selectedItem.price, number)} DH` : "0 DH"}
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={styles.closeButton}
+            >
+              <Text style={styles.closeButtonText}>
+                <AntDesign name="close" size={24} color="black" />
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+            style={styles.envoyerButton}
+            >
+              <Text   style={styles.TextenvoyerButton}>Send</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
             </View>
           ))
         ) : (
@@ -233,6 +330,81 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)", // Couleur de fond semi-transparente
+  },
+  modalContent: {
+    backgroundColor: "#e7e7e7",
+    padding: 30,
+    borderRadius: 10,
+    width: "80%",
+   
+  },
+  modalText: {
+    fontSize: 17,
+    marginBottom: 15,
+    right:10,
+    color:'#818183'
+  },
+  closeButton: {
+    position: "absolute", // Permet de positionner en haut à droite
+    top: 10, // Décalage par rapport au haut
+    right: 10, // Décalage par rapport à la droite
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: "white",
+    fontSize: 16,
+  },
+  inputInline: {
+    height: 40,
+    width: '100%',
+    borderColor: "#203165",
+    borderWidth: 1,
+    borderRadius: 12,
+    alignSelf: "flex-start", // Permet de s'aligner à gauche
+    marginTop: 10, // Espacement au-dessus
+    paddingLeft:10
+  },
+  textChange:{
+    fontSize:20,
+    right:10,
+    marginBottom:10,
+    color:'#203165'
+  },
+  textArea: {
+    height: 100,
+    width:'100%',  // You can adjust the height as needed
+    borderColor: "#203165",
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 15,
+    textAlignVertical: "top",  // Ensures text starts at the top of the textarea
+  },
+  totle:{
+    fontSize:20,
+    textAlign:'center'
+  },
+  envoyerButton:{
+    width:'100%',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding:10,
+    marginTop:10,
+    backgroundColor:'#203165',
+
+  },
+  TextenvoyerButton:{
+    color:"#fff",
+    fontSize:20,
+    fontWeight:'bold',
+    textAlign:'center'
+  }
 });
 
 export default Technicien;

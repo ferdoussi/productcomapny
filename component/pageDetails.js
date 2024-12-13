@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
-
+import { useNavigation } from '@react-navigation/native';
 import Header from "./head/header";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
@@ -24,7 +24,7 @@ const PageDetails = () => {
   const [dateTime2, setDateTime2] = useState(new Date());
   const [dateTime3, setDateTime3] = useState(new Date());
   const [dateTime4, setDateTime4] = useState(new Date()); // Added fourth date
-
+  const navigation = useNavigation();
   const handleChange = (event, selectedDate) => {
     if (!selectedDate) {
       setShowPicker(""); // Close the picker when no date is selected
@@ -108,6 +108,9 @@ const PageDetails = () => {
 
     return `${dateFormatted} ${timeFormatted}`;
   };
+  const backhome = ()=>{
+    navigation.navigate('ClientHome');
+  }
 
   return (
     <View style={styles.screen}>
@@ -115,8 +118,8 @@ const PageDetails = () => {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.title1}>Prestation :</Text>
-          <Text style={styles.back1}>
-            <AntDesign name="arrowleft" size={24} color="#203165" />
+          <Text style={styles.back1} onPress={backhome}>
+            <AntDesign name="arrowleft" size={24} color="#203165"/>
             Back
           </Text>
         </View>

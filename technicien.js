@@ -9,7 +9,7 @@ import {
   Modal,
   TextInput,
 } from "react-native";
-import Header from "./component/head/header";
+import HeaderTechnicien from "./headerTechnicien/headerTechnicien";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Icon from "react-native-vector-icons/Feather";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -34,6 +34,7 @@ const Technicien = () => {
       price: "1000DH",
       surface: "15M²",
       address: "10 Bd de la Liberté, Casablanca 20120",
+      image: require("./assets/logo1.png"),
     },
     {
       id: 2,
@@ -42,6 +43,7 @@ const Technicien = () => {
       price: "1200DH",
       surface: "20M²",
       address: "15 Rue de Paris, Casablanca 20200",
+      image: require("./assets/logo1.png"),
     },
     {
       id: 3,
@@ -50,6 +52,7 @@ const Technicien = () => {
       price: "800DH",
       surface: "10M²",
       address: "20 Ave Mohammed VI, Casablanca 20300",
+      image: require("./assets/logo1.png"),
     },
     {
       id: 4,
@@ -58,6 +61,7 @@ const Technicien = () => {
       price: "800DH",
       surface: "60M²",
       address: "20 Ave Mohammed VI, Casablanca 20300",
+      image: require("./assets/logo1.png"),
     },
   ];
 
@@ -88,13 +92,15 @@ const Technicien = () => {
     return colors[Math.floor(Math.random() * colors.length)];
   };
   const calculateTotalPrice = (originalPrice, addedPrice) => {
-    const originalPriceNumeric = parseFloat(originalPrice.replace('DH', '').trim());
+    const originalPriceNumeric = parseFloat(
+      originalPrice.replace("DH", "").trim()
+    );
     const addedPriceNumeric = parseFloat(addedPrice || 0);
     return originalPriceNumeric + addedPriceNumeric;
   };
   return (
     <View style={styles.screen}>
-      <Header />
+      <HeaderTechnicien />
 
       {/* Date Picker Button */}
       <View style={styles.searchContainer}>
@@ -127,9 +133,10 @@ const Technicien = () => {
               ]}
             >
               <Image
-                source={require("./assets/logo1.png")}
+                source={item.image} // Use item.image directly
                 style={styles.image}
               />
+
               <View style={styles.infoContainer}>
                 <Text style={styles.file}>
                   <AntDesign
@@ -151,79 +158,128 @@ const Technicien = () => {
                 </View>
               </View>
               {/* modal */}
-            {/* Modal for item details */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalText}>
-            <Text style={{fontWeight:'bold',fontSize:20,color:'#203165'}}>Address :</Text> {selectedItem ? ` ${selectedItem.address}` : "Aucun élément sélectionné"}
-            </Text>
-            <Text style={styles.modalText}>
-            <Text style={{fontWeight:'bold',fontSize:20,color:'#203165'}}>Title :</Text> {selectedItem ? ` ${selectedItem.title}` : "Aucun élément sélectionné"}
-            </Text>
-            <Text style={styles.modalText}>
-            <Text style={{fontWeight:'bold',fontSize:20,color:'#203165'}}>Surface :</Text> {selectedItem ? ` ${selectedItem.surface}` : "Aucun élément sélectionné"}
-            </Text>
-            <Text style={styles.modalText}>
-              <Text style={{fontWeight:'bold',fontSize:20,color:'#203165'}}>Prix :</Text> {selectedItem ? ` ${selectedItem.price}` : "Aucun élément sélectionné"}
-            </Text>
+              {/* Modal for item details */}
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+              >
+                <View style={styles.modalContainer}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalText}>
+                      <Text
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: 20,
+                          color: "#203165",
+                        }}
+                      >
+                        Address :
+                      </Text>{" "}
+                      {selectedItem
+                        ? ` ${selectedItem.address}`
+                        : "Aucun élément sélectionné"}
+                    </Text>
+                    <Text style={styles.modalText}>
+                      <Text
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: 20,
+                          color: "#203165",
+                        }}
+                      >
+                        Title :
+                      </Text>{" "}
+                      {selectedItem
+                        ? ` ${selectedItem.title}`
+                        : "Aucun élément sélectionné"}
+                    </Text>
+                    <Text style={styles.modalText}>
+                      <Text
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: 20,
+                          color: "#203165",
+                        }}
+                      >
+                        Surface :
+                      </Text>{" "}
+                      {selectedItem
+                        ? ` ${selectedItem.surface}`
+                        : "Aucun élément sélectionné"}
+                    </Text>
+                    <Text style={styles.modalText}>
+                      <Text
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: 20,
+                          color: "#203165",
+                        }}
+                      >
+                        Prix :
+                      </Text>{" "}
+                      {selectedItem
+                        ? ` ${selectedItem.price}`
+                        : "Aucun élément sélectionné"}
+                    </Text>
 
-            {/* Input to update price */}
-            <Text style={styles.textChange}>Update Price:</Text>
-            <Text style={styles.modalText}>
-              {selectedItem ? (
-                <TextInput
-                  style={styles.inputInline}
-                  placeholder="Add price..."
-                  keyboardType="numeric"
-                  value={number}
-                  onChangeText={(text) => setNumber(text.replace(/[^0-9.]/g, ""))}
-                />
-              ) : null}
-            </Text>
+                    {/* Input to update price */}
+                    <Text style={styles.textChange}>Update Price:</Text>
+                    <Text style={styles.modalText}>
+                      {selectedItem ? (
+                        <TextInput
+                          style={styles.inputInline}
+                          placeholder="Add price..."
+                          keyboardType="numeric"
+                          value={number}
+                          onChangeText={(text) =>
+                            setNumber(text.replace(/[^0-9.]/g, ""))
+                          }
+                        />
+                      ) : null}
+                    </Text>
 
-            {/* Input to add description */}
-            <Text style={styles.textChange}>Add Description:</Text>
-            <Text style={styles.modalText}>
-              {selectedItem ? (
-                <TextInput
-                  style={styles.textArea}
-                  placeholder="Add description..."
-                  multiline
-                  numberOfLines={4}
-                  value={text}
-                  onChangeText={(newText) => setText(newText)}
-                />
-              ) : null}
-            </Text>
+                    {/* Input to add description */}
+                    <Text style={styles.textChange}>Add Description:</Text>
+                    <Text style={styles.modalText}>
+                      {selectedItem ? (
+                        <TextInput
+                          style={styles.textArea}
+                          placeholder="Add description..."
+                          multiline
+                          numberOfLines={4}
+                          value={text}
+                          onChangeText={(newText) => setText(newText)}
+                        />
+                      ) : null}
+                    </Text>
 
-            {/* Display total price */}
-            <Text style={styles.totle}>
-              <Text style={{color:'#FBBF46'}}>Total:{" "}</Text>
-              {selectedItem ? `${calculateTotalPrice(selectedItem.price, number)} DH` : "0 DH"}
-            </Text>
+                    {/* Display total price */}
+                    <Text style={styles.totle}>
+                      <Text style={{ color: "#FBBF46" }}>Total: </Text>
+                      {selectedItem
+                        ? `${calculateTotalPrice(
+                            selectedItem.price,
+                            number
+                          )} DH`
+                        : "0 DH"}
+                    </Text>
 
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={styles.closeButton}
-            >
-              <Text style={styles.closeButtonText}>
-                <AntDesign name="close" size={24} color="black" />
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-            style={styles.envoyerButton}
-            >
-              <Text   style={styles.TextenvoyerButton}>Send</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+                    <TouchableOpacity
+                      onPress={() => setModalVisible(false)}
+                      style={styles.closeButton}
+                    >
+                      <Text style={styles.closeButtonText}>
+                        <AntDesign name="close" size={24} color="black" />
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.envoyerButton}>
+                      <Text style={styles.TextenvoyerButton}>Send</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
             </View>
           ))
         ) : (
@@ -341,13 +397,12 @@ const styles = StyleSheet.create({
     padding: 30,
     borderRadius: 10,
     width: "80%",
-   
   },
   modalText: {
     fontSize: 17,
     marginBottom: 15,
-    right:10,
-    color:'#818183'
+    right: 10,
+    color: "#818183",
   },
   closeButton: {
     position: "absolute", // Permet de positionner en haut à droite
@@ -363,48 +418,47 @@ const styles = StyleSheet.create({
   },
   inputInline: {
     height: 40,
-    width: '100%',
+    width: "100%",
     borderColor: "#203165",
     borderWidth: 1,
     borderRadius: 12,
     alignSelf: "flex-start", // Permet de s'aligner à gauche
     marginTop: 10, // Espacement au-dessus
-    paddingLeft:10
+    paddingLeft: 10,
   },
-  textChange:{
-    fontSize:20,
-    right:10,
-    marginBottom:10,
-    color:'#203165'
+  textChange: {
+    fontSize: 20,
+    right: 10,
+    marginBottom: 10,
+    color: "#203165",
   },
   textArea: {
     height: 100,
-    width:'100%',  // You can adjust the height as needed
+    width: "100%", // You can adjust the height as needed
     borderColor: "#203165",
     borderWidth: 1,
     borderRadius: 10,
     padding: 15,
-    textAlignVertical: "top",  // Ensures text starts at the top of the textarea
+    textAlignVertical: "top", // Ensures text starts at the top of the textarea
   },
-  totle:{
-    fontSize:20,
-    textAlign:'center'
+  totle: {
+    fontSize: 20,
+    textAlign: "center",
   },
-  envoyerButton:{
-    width:'100%',
+  envoyerButton: {
+    width: "100%",
     borderWidth: 1,
     borderRadius: 10,
-    padding:10,
-    marginTop:10,
-    backgroundColor:'#203165',
-
+    padding: 10,
+    marginTop: 10,
+    backgroundColor: "#203165",
   },
-  TextenvoyerButton:{
-    color:"#fff",
-    fontSize:20,
-    fontWeight:'bold',
-    textAlign:'center'
-  }
+  TextenvoyerButton: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
 });
 
 export default Technicien;

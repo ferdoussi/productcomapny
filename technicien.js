@@ -251,7 +251,7 @@ const Technicien = () => {
                           color: "#203165",
                         }}
                       >
-                        Prix :
+                        Price :
                       </Text>{" "}
                       {selectedItem
                         ? ` ${selectedItem.price}`
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
   },
   detailsText1: {
     color: "#fff",
-    marginLeft:15,
+    marginLeft: 15,
     fontSize: 17,
     marginTop: 8,
   },

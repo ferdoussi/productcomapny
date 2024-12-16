@@ -74,15 +74,14 @@ const LoginScreen = () => {
       setLoading(true);
 
       try {
-        console.log("Attempting login with:", { email, password });
-
+        //console.log("Attempting login with:", { email, password });
         // Send login request
         const loginResponse = await axios.post(API_LOGIN_ENDPOINT, {
           email,
           password,
         });
 
-        console.log("Login Response:", loginResponse.data);
+        //console.log("Login Response:", loginResponse.data);
 
         if (loginResponse.data) {
           const { message, user } = loginResponse.data;

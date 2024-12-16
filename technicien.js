@@ -11,9 +11,10 @@ import {
 } from "react-native";
 import HeaderTechnicien from "./headerTechnicien/headerTechnicien";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import Icon from "react-native-vector-icons/Feather";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
+import Entypo from "@expo/vector-icons/Entypo";
+import { Linking, Platform } from "react-native"; // Use React Native's Linking module
 
 const Technicien = () => {
   const [searchQuery, setSearchQuery] = useState(""); // Date selected by user
@@ -34,7 +35,7 @@ const Technicien = () => {
       price: "1000DH",
       surface: "15M²",
       address: "10 Bd de la Liberté, Casablanca 20120",
-      image: require("./assets/logo1.png"),
+      image: require("./assets/image/menage.jpg"),
     },
     {
       id: 2,
@@ -42,8 +43,8 @@ const Technicien = () => {
       title: "Cleaning",
       price: "1200DH",
       surface: "20M²",
-      address: "15 Rue de Paris, Casablanca 20200",
-      image: require("./assets/logo1.png"),
+      address: "15 Bd de Paris",
+      image: require("./assets/image/plb.jpg"),
     },
     {
       id: 3,
@@ -51,17 +52,8 @@ const Technicien = () => {
       title: "Menage",
       price: "800DH",
       surface: "10M²",
-      address: "20 Ave Mohammed VI, Casablanca 20300",
-      image: require("./assets/logo1.png"),
-    },
-    {
-      id: 4,
-      date: "12/12/2024 | 10:00AM-12:00PM",
-      title: "Menage",
-      price: "800DH",
-      surface: "60M²",
-      address: "20 Ave Mohammed VI, Casablanca 20300",
-      image: require("./assets/logo1.png"),
+      address: "20 Bd Mohammed VI",
+      image: require("./assets/image/Deratisation.jpg"),
     },
   ];
 
@@ -91,6 +83,7 @@ const Technicien = () => {
     const colors = ["#203165", "#2C4A74", "#1F2C3B", "#263340", "#2A3D54"];
     return colors[Math.floor(Math.random() * colors.length)];
   };
+
   const calculateTotalPrice = (originalPrice, addedPrice) => {
     const originalPriceNumeric = parseFloat(
       originalPrice.replace("DH", "").trim()
@@ -98,6 +91,35 @@ const Technicien = () => {
     const addedPriceNumeric = parseFloat(addedPrice || 0);
     return originalPriceNumeric + addedPriceNumeric;
   };
+  // function for google maps
+  const openGoogleMaps = (address) => {
+    const encodedAddress = encodeURIComponent(address);
+    console.log(encodedAddress);
+
+    let url;
+
+    if (Platform.OS === "ios") {
+      // URL to open Apple Maps in iOS
+      url = `maps://?q=${encodedAddress}`;
+    } else if (Platform.OS === "android") {
+      // URL to open Google Maps on Android
+      url = `geo:0,0?q=${encodedAddress}`;
+    }
+
+    // Check if the application supports opening the link
+    Linking.canOpenURL(url)
+      .then((supported) => {
+        if (supported) {
+          Linking.openURL(url);
+        } else {
+          // If the application is not supported, open the link in the browser
+          const fallbackUrl = `https://www.google.com/maps/search/?q=${encodedAddress}`;
+          Linking.openURL(fallbackUrl);
+        }
+      })
+      .catch((err) => console.error("An error occurred: ", err));
+  };
+
   return (
     <View style={styles.screen}>
       <HeaderTechnicien />
@@ -132,10 +154,7 @@ const Technicien = () => {
                 },
               ]}
             >
-              <Image
-                source={item.image} // Use item.image directly
-                style={styles.image}
-              />
+              <Image source={item.image} style={styles.image} />
 
               <View style={styles.infoContainer}>
                 <Text style={styles.file}>
@@ -156,9 +175,14 @@ const Technicien = () => {
                 <View style={styles.detailsContainer}>
                   <Text style={styles.detailsText}>{item.address}</Text>
                 </View>
+                <Text
+                  style={styles.detailsText1}
+                  onPress={() => openGoogleMaps(item.address)}
+                >
+                  <Entypo name="location" size={24} color="white" />
+                </Text>
               </View>
-              {/* modal */}
-              {/* Modal for item details */}
+              {/* Modal */}
               <Modal
                 animationType="slide"
                 transparent={true}
@@ -167,20 +191,15 @@ const Technicien = () => {
               >
                 <View style={styles.modalContainer}>
                   <View style={styles.modalContent}>
-                    <Text style={styles.modalText}>
-                      <Text
-                        style={{
-                          fontWeight: "bold",
-                          fontSize: 20,
-                          color: "#203165",
-                        }}
-                      >
-                        Address :
-                      </Text>{" "}
-                      {selectedItem
-                        ? ` ${selectedItem.address}`
-                        : "Aucun élément sélectionné"}
+                    <Text style={styles.modalText1}>
+                      {selectedItem && selectedItem.image ? (
+                        <Image
+                          source={selectedItem.image}
+                          style={styles.image2}
+                        />
+                      ) : null}
                     </Text>
+
                     <Text style={styles.modalText}>
                       <Text
                         style={{
@@ -195,6 +214,21 @@ const Technicien = () => {
                         ? ` ${selectedItem.title}`
                         : "Aucun élément sélectionné"}
                     </Text>
+                    <Text style={styles.modalText}>
+                      <Text
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: 20,
+                          color: "#203165",
+                        }}
+                      >
+                        Address :
+                      </Text>{" "}
+                      {selectedItem
+                        ? ` ${selectedItem.address}`
+                        : "Aucun élément sélectionné"}
+                    </Text>
+
                     <Text style={styles.modalText}>
                       <Text
                         style={{
@@ -293,6 +327,7 @@ const Technicien = () => {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    backgroundColor: "#f5f5f5", // Light background color for better contrast
   },
   cardsWrapper: {
     paddingBottom: 20,
@@ -303,29 +338,34 @@ const styles = StyleSheet.create({
     margin: 10,
     overflow: "hidden",
     elevation: 5,
-    height: 170,
-    alignSelf: "center",
+    flex: 1, // Ensures the card takes flexible space
     backgroundColor: "transparent",
-    marginTop: 20,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 5,
   },
   image: {
+    width: 150,
+    height: 150, // Ensure the height is consistent
+    marginRight: 15,
+    borderRadius: 10, // Optional: add border radius to the image
+    marginTop: 30,
+    marginLeft: 15,
+  },
+  image2: {
     width: 110,
     height: 110,
     marginRight: 15,
     marginTop: 17,
+    backgroundColor: "#fff",
+    borderRadius: 10,
   },
   infoContainer: {
     flex: 1,
-    padding: 10,
-    marginTop: 15,
+    padding: 15,
+    marginTop: 8,
+    justifyContent: "space-between",
   },
   title: {
     fontSize: 17,
@@ -334,28 +374,33 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: "white",
+    color: "#fff",
     marginBottom: 5,
   },
   detailsContainer: {
     marginTop: 5,
   },
   detailsText: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#fff",
+  },
+  detailsText1: {
+    color: "#fff",
+    marginLeft:15,
+    fontSize: 17,
+    marginTop: 8,
   },
   file: {
     color: "#fff",
     backgroundColor: "white",
     position: "absolute",
-    right: 1,
+    right: 10,
     borderRadius: 15,
-    top: 130,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#FAFAFA",
     borderRadius: 20,
     paddingLeft: 15,
     margin: 10,
@@ -363,7 +408,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#203165",
     width: "90%",
-    backgroundColor: "#FAFAFA",
     alignSelf: "center",
     marginTop: 15,
   },
@@ -390,24 +434,28 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)", // Couleur de fond semi-transparente
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
     backgroundColor: "#e7e7e7",
     padding: 30,
     borderRadius: 10,
     width: "80%",
+    maxHeight: "80%", // Ensure modal content doesn't overflow
+  },
+  modalText1: {
+    marginBottom: 15,
+    textAlign: "center",
   },
   modalText: {
     fontSize: 17,
     marginBottom: 15,
-    right: 10,
     color: "#818183",
   },
   closeButton: {
-    position: "absolute", // Permet de positionner en haut à droite
-    top: 10, // Décalage par rapport au haut
-    right: 10, // Décalage par rapport à la droite
+    position: "absolute",
+    top: 10,
+    right: 10,
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
@@ -422,41 +470,38 @@ const styles = StyleSheet.create({
     borderColor: "#203165",
     borderWidth: 1,
     borderRadius: 12,
-    alignSelf: "flex-start", // Permet de s'aligner à gauche
-    marginTop: 10, // Espacement au-dessus
+    marginTop: 10,
     paddingLeft: 10,
   },
   textChange: {
     fontSize: 20,
-    right: 10,
     marginBottom: 10,
     color: "#203165",
   },
   textArea: {
     height: 100,
-    width: "100%", // You can adjust the height as needed
+    width: "100%",
     borderColor: "#203165",
     borderWidth: 1,
     borderRadius: 10,
     padding: 15,
-    textAlignVertical: "top", // Ensures text starts at the top of the textarea
+    textAlignVertical: "top",
   },
   totle: {
     fontSize: 20,
     textAlign: "center",
+    color: "#203165",
+    marginTop: 15,
   },
   envoyerButton: {
-    width: "100%",
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-    marginTop: 10,
     backgroundColor: "#203165",
+    marginTop: 8,
+    paddingVertical: 10,
+    borderRadius: 5,
   },
   TextenvoyerButton: {
     color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 18,
     textAlign: "center",
   },
 });

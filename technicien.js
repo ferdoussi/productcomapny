@@ -54,7 +54,7 @@ const Technicien = () => {
       surface: "10M²",
       address: "20 Bd Mohammed VI",
       image: require("./assets/image/Deratisation.jpg"),
-    },
+    },  
   ];
 
   // Function to filter items based on the selected date

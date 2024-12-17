@@ -10,10 +10,10 @@ const WelcomeScreen = () => {
   const chartHeight = 180;
 
   const barChartData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    labels: ["Jan", "Feb", "Mar"],
     datasets: [
       {
-        data: [20, 45, 28, 80, 99, 43],
+        data: [20, 45, 28 ],
         // تغيير اللون للمخطط داخل barChartData
         color: (opacity = 1) => `rgba(255, 99, 132, ${opacity})`, // اللون الأحمر
         // يمكن إضافة المزيد من الألوان إذا كان لديك أكثر من مجموعة بيانات

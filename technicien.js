@@ -34,7 +34,7 @@ const Technicien = () => {
       title: "Menage",
       price: "1000DH",
       surface: "15M²",
-      address: "10 Bd de la Liberté, Casablanca 20120",
+      address: "10 Bd de la Liberté",
       image: require("./assets/image/menage.jpg"),
     },
     {
@@ -54,7 +54,7 @@ const Technicien = () => {
       surface: "10M²",
       address: "20 Bd Mohammed VI",
       image: require("./assets/image/Deratisation.jpg"),
-    },  
+    },
   ];
 
   // Function to filter items based on the selected date
@@ -131,6 +131,12 @@ const Technicien = () => {
             {selectedDate ? selectedDate : "Select Date"}
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.allButton}
+          onPress={() => setSearchQuery("")} // Reset the search query to show all items
+        >
+          <Text style={styles.allButtonText}>All</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Date Picker Modal */}
@@ -169,7 +175,7 @@ const Technicien = () => {
                   />
                 </Text>
                 <Text style={styles.title}>{item.date}</Text>
-                <Text style={styles.subtitle}>{item.title}</Text>
+                <Text style={styles.subtitle}>Title :{item.title}</Text>
                 <Text style={styles.subtitle}>Prix : {item.price}</Text>
                 <Text style={styles.detailsText}>Surface : {item.surface}</Text>
                 <View style={styles.detailsContainer}>
@@ -394,27 +400,44 @@ const styles = StyleSheet.create({
     color: "#fff",
     backgroundColor: "white",
     position: "absolute",
-    right: 10,
+    right: 15,
     borderRadius: 15,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FAFAFA",
+    backgroundColor: "#203165",
     borderRadius: 20,
     paddingLeft: 15,
     margin: 10,
     height: 45,
     borderWidth: 1,
     borderColor: "#203165",
-    width: "90%",
-    alignSelf: "center",
+    width: "40%",
+    //alignSelf: "center",
+    left:40,
     marginTop: 15,
   },
+  allButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: "#203165", // لون مميز للزر
+    borderRadius: 20,
+    width: "90%", // عرض مناسب
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 10, // مسافة بين الأزرار
+  },
+  allButtonText: {
+    fontSize: 16,
+    color: "#FFF", // النص باللون الأبيض
+    fontWeight: "bold",
+  },
+  
   dateButton: {
     paddingVertical: 10,
     paddingHorizontal: 15,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: "#203165",
     borderRadius: 20,
     width: "100%",
     alignItems: "center",
@@ -422,11 +445,12 @@ const styles = StyleSheet.create({
   },
   dateButtonText: {
     fontSize: 16,
-    color: "#203165",
+    color: "#fff",
+    paddingRight:10
   },
   noResultsText: {
     fontSize: 18,
-    color: "gray",
+    color: "#203165",
     textAlign: "center",
     marginTop: 20,
   },

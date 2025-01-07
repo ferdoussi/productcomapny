@@ -1,166 +1,172 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Image,
-  TouchableOpacity,
-  Alert
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from "react-native";
+import { useNavigation } from '@react-navigation/native'; // استيراد useNavigation
+import AntDesign from "@expo/vector-icons/AntDesign";
+import Header from "./head/header";
+import { useSelector } from 'react-redux'; // استيراد useSelector للوصول إلى الحالة من Redux
+import axios from "axios";
 
 const Marketplace = ({ route }) => {
-  const { marketplace } = route.params; // Data comes from previous screen
+  const { vistid } = route.params || {};
+  const clientID = useSelector((state) => state.client.clientID);
+  console.log('ClientID from Page MarketPlace :', clientID);
+  console.log("Marketplace vist", vistid);
 
-  // Initialize the marketplace state
-  const [marketplaceData, setMarketplaceData] = useState(marketplace);
-
-  // Calculate the total
-  const totalPrix = marketplaceData.reduce(
-    (total, product) => total + parseInt(product.prix),
-    0
-  );
-
-  // Send function (can be customized as needed)
-  const handleSend = () => {
-    console.log("Produits envoyés:", marketplaceData);
-    // API call or mail sending logic can be added here
-  };
-
-  // Handle delete of an item from marketplace
+  const [marketplaceData, setMarketplaceData] = useState([]); // حالة البيانات
+  const [error, setError] = useState(null); // حالة الخطأ
+  const [message, setMessage] = useState(null); // حالة الرسالة للعرض
+  const navigation = useNavigation(); // الوصول إلى التنقل
   
-  const handleDelete = (id) => {
-    // Show an alert to confirm deletion
-    Alert.alert(
-      'Delete Item',
-      'Are you sure you want to delete this item?',
-      [
-        { 
-          text: 'NO', 
-          onPress: () => {
-            // Do nothing, just close the alert
-            console.log('Deletion canceled');
-          },
-          style: 'cancel' // Style for the cancel button
-        },
-        { 
-          text: 'YES', 
-          onPress: () => {
-            // Proceed with deletion if OK is pressed
-            const updatedMarketplace = marketplaceData.filter((item) => item.id !== id);
-            setMarketplaceData(updatedMarketplace);
-          },
-          style: 'destructive' // Style for the destructive (red) button
-        }
-      ]
-    );
-  };
-  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log(`Fetching data for vistid: ${vistid}`);
+        const response = await axios.get(
+          `http://192.168.100.150:8000/api/prestation/${vistid}`
+        );
 
-  const [menuVisible, setMenuVisible] = useState(false);
-  const navigation = useNavigation();
+        console.log("Response Status:", response.status);
+        console.log("Response Data:", response.data);
 
-  // const addToMarketplace = (product) => {
-  //   setMarketplaceData([...marketplaceData, product]);
-  // };
+        setMarketplaceData(response.data);
+        console.log("Updated marketplaceData state:", response.data);
+      } catch (err) {
+        console.error("Error fetching data:", err.response ? err.response.data : err.message);
+        setError("Failed to fetch data.");
+      }
+    };
 
-  const toggleMenu = () => {
-    setMenuVisible(!menuVisible);
-  };
+    fetchData();
+  }, [vistid]);
 
-  const closeMenu = () => {
-    setMenuVisible(false);
-  };
+  if (error) {
+    return <Text>{error}</Text>;
+  }
 
-  const handleLogout = async () => {
+  // دالة حذف العنصر
+  const handleDelete = async (id) => {
+    console.log("Deleting item with id:", id);
+    setMarketplaceData((prevData) => {
+      if (Array.isArray(prevData)) {
+        return prevData.filter((item) => item.id !== id); // حذف العنصر من الواجهة
+      }
+      return [];
+    });
+
     try {
-      // Remove the authentication token
-      await AsyncStorage.removeItem('authToken');
-      
-      // Navigate to the login screen and clear the navigation stack
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
-    } catch (error) {
-      console.error("Error removing authToken", error);
+      const response = await axios.delete(`http://192.168.100.150:8000/api/prestations/${id}`);
+      console.log("Item deleted from database:", response.data);
+
+      if (response.status === 200) {
+        console.log("Item successfully deleted");
+        navigation.navigate("ClientHome", { clientID });
+      }
+    } catch (err) {
+      console.error("Error deleting item:", err.response ? err.response.data : err.message);
+      setError("Failed to delete item.");
     }
   };
 
-  const handleHome = () => {
-    navigation.navigate("Home");
+  const handleSendData = async () => {
+    try {
+      console.log("Sending data to API...");
+
+      // التأكد من تنسيق التواريخ
+      const formattedData = {
+        ...marketplaceData,
+        total: marketplaceData.total || 0, // Ensure the total is included
+        date1: formatDate(marketplaceData.date1),
+        date2: formatDate(marketplaceData.date2),
+        date3: formatDate(marketplaceData.date3),
+        date4: formatDate(marketplaceData.date4),
+      };
+
+      const response = await axios.post("http://192.168.100.150:8000/api/send-prestations", formattedData);
+
+      if (response.status === 200 || response.status === 201) {
+        console.log("Data sent successfully:", response.data);
+        setMessage({ text: "Data sent successfully!", type: "success" });
+        navigation.navigate('ClientHome');
+      } else {
+        console.error("Unexpected response status:", response.status);
+        setMessage({ text: "Failed to send data.", type: "error" });
+      }
+    } catch (err) {
+      console.error("Error sending data:", err.response ? err.response.data : err.message);
+      setMessage({ text: `Failed to send data. ${err.response ? err.response.data : err.message}`, type: "error" });
+    }
+  };
+
+  const formatDate = (date) => {
+    const formattedDate = new Date(date);
+
+    let hour = formattedDate.getHours();
+    const minute = ("0" + formattedDate.getMinutes()).slice(-2);
+    let ampm = hour >= 12 ? 'PM' : 'AM';
+
+    // Convert to 12-hour format
+    if (hour === 0) {
+      hour = 12; // Midnight case
+    } else if (hour > 12) {
+      hour = hour - 12; // Convert 24-hour to 12-hour format
+    }
+
+    const year = formattedDate.getFullYear();
+    const month = ("0" + (formattedDate.getMonth() + 1)).slice(-2);
+    const day = ("0" + formattedDate.getDate()).slice(-2);
+
+    // Ensure leading zero for single-digit hours
+    const hourWithLeadingZero = ("0" + hour).slice(-2);
+
+    // Return formatted string in Y-m-d h:i A format
+    return `${year}-${month}-${day} ${hourWithLeadingZero}:${minute} ${ampm}`;
+  };
+  const formatDateAndTime = (dateString) => {
+    const date = new Date(dateString);
+
+    // Date part
+    const day = date.getDate();
+    const month = date.getMonth() + 1; // months are zero-indexed
+    const year = date.getFullYear();
+    const formattedDay = day < 10 ? `0${day}` : day;
+    const formattedMonth = month < 10 ? `0${month}` : month;
+    const formattedDate = `${formattedDay}/${formattedMonth}/${year}`;
+
+    // Time part
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+    const formattedTime = `${formattedHours}:${formattedMinutes} ${period}`;
+
+    return `${formattedDate} ${formattedTime}`;
   };
 
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.menuIcon} onPress={toggleMenu}>
-          <Icon name="menu" size={30} color="#fff" />
-        </TouchableOpacity>
-        <View style={styles.iconsContainer}>
-          <TouchableOpacity style={styles.notificationIcon}>
-            <Icon name="notifications" size={25} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.marketplaceIcon}
-            onPress={() =>
-              navigation.navigate("Marketplace", {
-                marketplace: marketplaceData,
-              })
-            }
-          >
-            <Icon name="cart" size={25} color="#fff" />
-            {marketplaceData.length > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{marketplaceData.length}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Dropdown Menu */}
-      {menuVisible && (
-        <View style={styles.menu}>
-          <TouchableOpacity style={styles.menuItem}>
-            <Icon name="person" size={20} color="#203165" />
-            <Text style={styles.menuText}>Profile</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={handleHome}>
-            <AntDesign name="caretleft" size={22} color="#203165" right={2}/>
-            <Text style={styles.menuText}>Products</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-            <Icon name="log-out" size={20} color="#203165" />
-            <Text style={styles.menuText}>Logout</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.closeButton} onPress={closeMenu}>
-            <Text style={styles.closeButtonText}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      <Header />
 
       {/* Header Information */}
       <View style={styles.header1}>
-        <Image
-          source={require("../assets/logo1.png")} // Add your logo here
-          style={styles.logo}
-        />
-        <Text style={styles.title}>Demande Prestation N°</Text>
+        <Image source={require("../assets/logo1.png")} style={styles.logo} />
+        <Text style={styles.title}>Demande Prestation {marketplaceData.id}</Text>
       </View>
       <Text style={styles.date}>Ville, le ../../....</Text>
+
+      {/* Message Display */}
+      {message && (
+        <Text style={[styles.message, message.type === 'success' ? styles.successMessage : styles.errorMessage]}>
+          {message.text}
+        </Text>
+      )}
 
       {/* Company Information */}
       <View style={styles.companyInfo}>
         <Text>INOVTEAM</Text>
         <Text>10 Bd de la Liberté, Casablanca 20120</Text>
-        <Text>CASABLANCA,.......</Text>
+        <Text>CASABLANCA, .......</Text>
         <Text>+212 652963481</Text>
         <Text>Email@gmail.com</Text>
       </View>
@@ -168,48 +174,60 @@ const Marketplace = ({ route }) => {
       {/* Table */}
       <View style={styles.table}>
         <View style={styles.tableHeader}>
-          <Text style={styles.tableHeaderCell}>Description</Text>
-          <Text style={styles.tableHeaderCell}>Prix Unitaire</Text>
-          <Text style={styles.tableHeaderCell}>Les Dates</Text>
-          <Text style={styles.tableHeaderCell}>Localisation</Text>
+          <Text style={styles.tableHeaderCell}>Title</Text>
+          <Text style={styles.tableHeaderCell}>Prix</Text>
+          <Text style={styles.tableHeaderCell}>Adress</Text>
+          <Text style={styles.tableHeaderCell}>Surface</Text>
           <Text style={styles.tableHeaderCell}>Action</Text>
         </View>
         <FlatList
-          data={marketplaceData}
-          keyExtractor={(item, index) => `${item.id}-${index}`}
-          renderItem={({ item }) => (
-            <View style={styles.tableRow}>
-              <Text style={styles.tableCell}>{item.name}</Text>
-              <Text style={styles.tableCell}>{item.prix} DH</Text>
-              <Text style={styles.tableCell}> 3* 20/12/2024</Text>
-              <Text style={styles.tableCell}>abdelmoumen </Text>
-              <Text style={styles.tableCell}>
+          data={[marketplaceData]} // wrap the data in an array
+          keyExtractor={(item) => (item.id ? item.id.toString() : item.title)}
+          renderItem={({ item }) => {
+            console.log("Item:", item);
+            return (
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{item.title}</Text>
+                <Text style={styles.tableCell}>{item.prix} DH</Text>
+                <Text style={styles.tableCell}>{item.adress}</Text> 
+                <Text style={styles.tableCell}>{item.surface}</Text>
                 <TouchableOpacity
-                  style={{ flexDirection: "row" }}
+                  style={styles.deleteButton}
                   onPress={() => handleDelete(item.id)}
                 >
                   <AntDesign name="delete" size={15} color="red" />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ flexDirection: "row" }}>
-                  <Text>.</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={{ flexDirection: "row" }}>
-                  <Text>.</Text>
-                </TouchableOpacity>
-              </Text>
-            </View>
-          )}
+              </View>
+            );
+          }}
         />
       </View>
-      
+
       {/* Total */}
       <View style={styles.totalContainer}>
         <Text style={styles.totalLabel}>Total HT:</Text>
-        <Text style={styles.totalValue}>{totalPrix} DH</Text>
+        <Text style={styles.totalValue}>{marketplaceData?.prix} DH</Text>
+      </View>
+
+      {/* Company Info and Description */}
+      <View style={styles.companyInfo1}>
+        <View style={styles.dates}>
+          <Text>Dates:</Text>
+          <Text>{formatDateAndTime(marketplaceData.date1)}</Text>
+          <Text>{formatDateAndTime(marketplaceData.date2)}</Text>
+          <Text>{formatDateAndTime(marketplaceData.date3)}</Text>
+          <Text>{formatDateAndTime(marketplaceData.date4)}</Text>
+        </View>
+        <View style={styles.divider}></View>
+        <View style={styles.comm}>
+          <Text>Description:</Text>
+          <Text>{marketplaceData?.description}</Text>
+        </View>
+        
       </View>
 
       {/* Submit Button */}
-      <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+      <TouchableOpacity style={styles.sendButton} onPress={handleSendData}>
         <Text style={styles.sendButtonText}>Envoyer</Text>
       </TouchableOpacity>
     </View>
@@ -219,92 +237,20 @@ const Marketplace = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#f8f9fa", // Light background for better contrast
+    padding: 10,
+    backgroundColor: "#f8f9fa",
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  message: {
+    textAlign: "center",
     marginBottom: 10,
-    marginTop: 30,
-  },
-  menuIcon: {
-    backgroundColor: "#203165",
-    padding: 10,
-    borderRadius: 25,
-    elevation: 5, // Shadow effect
-  },
-  iconsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  notificationIcon: {
-    backgroundColor: "#203165",
-    padding: 10,
-    borderRadius: 25,
-    marginRight: 15,
-    elevation: 5,
-  },
-  marketplaceIcon: {
-    backgroundColor: "#203165",
-    padding: 10,
-    borderRadius: 25,
-    elevation: 5,
-  },
-  badge: {
-    position: "absolute",
-    right: -5,
-    top: -5,
-    backgroundColor: "#ff6b6b",
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  badgeText: {
-    color: "#fff",
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: "bold",
   },
-  menu: {
-    position: "absolute",
-    top: 80,
-    left: 10,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    elevation: 5,
-    width: 180,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 7,
-    shadowOffset: { width: 0, height: 4 },
-    zIndex: 1,
+  successMessage: {
+    color: "green",
   },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 15,
-  },
-  menuText: {
-    fontSize: 16,
-    marginLeft: 10,
-    color: "#203165",
-  },
-  closeButton: {
-    backgroundColor: "#FBBF46",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 10,
-  },
-  closeButtonText: {
-    fontSize: 16,
-    color: "#203165",
-    fontWeight: "600",
+  errorMessage: {
+    color: "red",
   },
   header1: {
     flexDirection: "row",
@@ -334,11 +280,28 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     backgroundColor: "#ffffff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+  },
+  companyInfo1: {
     marginBottom: 20,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: "#ffffff",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  dates: {
+    flex: 1,
+    marginRight: 10,
+  },
+  divider: {
+    width: 1,
+    backgroundColor: "#203165",
+    height: "100%",
+    marginHorizontal: 10,
+  },
+  comm: {
+    flex: 1,
   },
   table: {
     marginBottom: 20,

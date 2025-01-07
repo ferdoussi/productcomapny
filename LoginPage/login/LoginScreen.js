@@ -7,7 +7,8 @@ import {
   SafeAreaView,
   TouchableWithoutFeedback,
   Keyboard,
-  ActivityIndicator,Image
+  ActivityIndicator,
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
@@ -18,10 +19,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as LocalAuthentication from "expo-local-authentication";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import styles from "./style.jsx";
-
+import { useDispatch, useSelector } from "react-redux"; // Import useDispatch from redux
+import { setClientID } from "../../redux/clientSlice.js"; // Import the action to set clientID
 
 const API_LOGIN_ENDPOINT = "http://192.168.100.150:8000/api/login";
-
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -32,6 +33,9 @@ const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const clientID = useSelector((state) => state.client.clientID);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const loadCredentials = async () => {
@@ -46,7 +50,7 @@ const LoginScreen = () => {
       } catch (error) {
         console.error("Failed to load credentials:", error);
       }
-    }; 
+    };
 
     loadCredentials();
   }, []);
@@ -67,6 +71,13 @@ const LoginScreen = () => {
       setSnackbarVisible(false);
     }, 3000);
   }, []);
+
+  // Log the clientID after it changes
+  useEffect(() => {
+    if (clientID) {
+      console.log("ClientID saved in Redux:", clientID); // Log after Redux state has updated
+    }
+  }, [clientID]); // Effect runs when clientID changes
 
   const handleLogin = useCallback(
     async (values, { setFieldError, setSubmitting }) => {
@@ -95,20 +106,26 @@ const LoginScreen = () => {
             await AsyncStorage.removeItem("userPassword");
           }
 
+          // Dispatch the clientID to Redux store
+          dispatch(setClientID(user.id)); // Save clientID in Redux
+
+          // Log the clientID from Redux to verify it's saved correctly
+          console.log("ClientID saved in Redux:", clientID); // This will log the latest state of clientID
+
           // Navigate to the Accueil screen with user information
           if (user.role === "client") {
             navigation.navigate("ClientHome", {
               message: "Connexion réussie",
               nom: user.nom,
               prenom: user.prenom,
-              userID: user.id,
+              clientID: user.id,
             });
           } else if (user.role === "technicien") {
             navigation.navigate("TechnicienHome", {
               message: "Connexion réussie",
               nom: user.nom,
               prenom: user.prenom,
-              userID: user.id,
+              clientID: user.id,
             });
           }
         } else {
@@ -128,7 +145,7 @@ const LoginScreen = () => {
         setSubmitting(false);
       }
     },
-    [navigation, rememberMe, showSnackbar]
+    [navigation, rememberMe, showSnackbar, dispatch]
   );
 
   const handleFingerprintLogin = async () => {
@@ -158,7 +175,10 @@ const LoginScreen = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <Text style={styles.image}>
-          <Image source={require("../../assets/logo.png")} style={{borderRadius:100}}/>
+          <Image
+            source={require("../../assets/logo.png")}
+            style={{ borderRadius: 100 }}
+          />
         </Text>
         <Text style={styles.title}>
           Hey,
@@ -168,7 +188,7 @@ const LoginScreen = () => {
         <Text style={styles.subText}>
           Veuillez vous connecter pour continuer
         </Text>
-        
+
         <Formik
           initialValues={{ email, password }}
           enableReinitialize
@@ -208,11 +228,12 @@ const LoginScreen = () => {
               )}
 
               <View style={styles.rememberMeContainer}>
-                <Checkbox style={{color:'red'}}
+                <Checkbox
+                  style={{ color: "red" }}
                   status={rememberMe ? "checked" : "unchecked"}
                   onPress={() => setRememberMe(!rememberMe)}
                 />
-                
+
                 <Text style={styles.rememberMeText}>Se souvenir de moi</Text>
               </View>
 

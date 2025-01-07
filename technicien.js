@@ -30,7 +30,7 @@ const Technicien = () => {
   const items = [
     {
       id: 1,
-      date: "12/12/2024 | 8:00AM-10:00AM",
+      date: "22/12/2024 | 8:00AM-10:00AM",
       title: "Menage",
       price: "1000DH",
       surface: "15M²",
@@ -39,21 +39,12 @@ const Technicien = () => {
     },
     {
       id: 2,
-      date: "13/12/2024 | 9:00AM-11:00AM",
+      date: "23/12/2024 | 9:00AM-11:00AM",
       title: "Cleaning",
       price: "1200DH",
       surface: "20M²",
       address: "15 Bd de Paris",
       image: require("./assets/image/plb.jpg"),
-    },
-    {
-      id: 3,
-      date: "14/12/2024 | 10:00AM-12:00PM",
-      title: "Menage",
-      price: "800DH",
-      surface: "10M²",
-      address: "20 Bd Mohammed VI",
-      image: require("./assets/image/Deratisation.jpg"),
     },
   ];
 
@@ -67,7 +58,6 @@ const Technicien = () => {
 
   // Show date picker
   const showDatePicker = () => setDatePickerVisibility(true);
-
   // Hide date picker
   const hideDatePicker = () => setDatePickerVisibility(false);
 
@@ -197,114 +187,21 @@ const Technicien = () => {
               >
                 <View style={styles.modalContainer}>
                   <View style={styles.modalContent}>
-                    <Text style={styles.modalText1}>
-                      {selectedItem && selectedItem.image ? (
-                        <Image
-                          source={selectedItem.image}
-                          style={styles.image2}
-                        />
-                      ) : null}
-                    </Text>
-
-                    <Text style={styles.modalText}>
-                      <Text
-                        style={{
-                          fontWeight: "bold",
-                          fontSize: 20,
-                          color: "#203165",
-                        }}
-                      >
-                        Title :
-                      </Text>{" "}
-                      {selectedItem
-                        ? ` ${selectedItem.title}`
-                        : "Aucun élément sélectionné"}
-                    </Text>
-                    <Text style={styles.modalText}>
-                      <Text
-                        style={{
-                          fontWeight: "bold",
-                          fontSize: 20,
-                          color: "#203165",
-                        }}
-                      >
-                        Address :
-                      </Text>{" "}
-                      {selectedItem
-                        ? ` ${selectedItem.address}`
-                        : "Aucun élément sélectionné"}
-                    </Text>
-
-                    <Text style={styles.modalText}>
-                      <Text
-                        style={{
-                          fontWeight: "bold",
-                          fontSize: 20,
-                          color: "#203165",
-                        }}
-                      >
-                        Surface :
-                      </Text>{" "}
-                      {selectedItem
-                        ? ` ${selectedItem.surface}`
-                        : "Aucun élément sélectionné"}
-                    </Text>
-                    <Text style={styles.modalText}>
-                      <Text
-                        style={{
-                          fontWeight: "bold",
-                          fontSize: 20,
-                          color: "#203165",
-                        }}
-                      >
-                        Price :
-                      </Text>{" "}
-                      {selectedItem
-                        ? ` ${selectedItem.price}`
-                        : "Aucun élément sélectionné"}
-                    </Text>
-
-                    {/* Input to update price */}
-                    <Text style={styles.textChange}>Update Price:</Text>
-                    <Text style={styles.modalText}>
-                      {selectedItem ? (
-                        <TextInput
-                          style={styles.inputInline}
-                          placeholder="Add price..."
-                          keyboardType="numeric"
-                          value={number}
-                          onChangeText={(text) =>
-                            setNumber(text.replace(/[^0-9.]/g, ""))
-                          }
-                        />
-                      ) : null}
-                    </Text>
-
-                    {/* Input to add description */}
-                    <Text style={styles.textChange}>Add Description:</Text>
-                    <Text style={styles.modalText}>
-                      {selectedItem ? (
-                        <TextInput
-                          style={styles.textArea}
-                          placeholder="Add description..."
-                          multiline
-                          numberOfLines={4}
-                          value={text}
-                          onChangeText={(newText) => setText(newText)}
-                        />
-                      ) : null}
-                    </Text>
-
-                    {/* Display total price */}
-                    <Text style={styles.totle}>
-                      <Text style={{ color: "#FBBF46" }}>Total: </Text>
-                      {selectedItem
-                        ? `${calculateTotalPrice(
-                            selectedItem.price,
-                            number
-                          )} DH`
-                        : "0 DH"}
-                    </Text>
+                    <View style={styles.modalText1}>
+                      <Image
+                        source={require("./assets/logo1.png")}
+                        style={styles.image2}
+                      />
+                      <Text style={styles.pres}>Prestation N°</Text>
+                    </View>
+                    <View style={styles.table}>
+                      <View style={styles.tableHeader}>
+                        <Text style={styles.tableHeaderCell}>Title</Text>
+                        <Text style={styles.tableHeaderCell}>Prix </Text>
+                        <Text style={styles.tableHeaderCell}>Localisation</Text>
+                        <Text style={styles.tableHeaderCell}>Action</Text>
+                      </View>
+                    </View>
 
                     <TouchableOpacity
                       onPress={() => setModalVisible(false)}
@@ -360,12 +257,9 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   image2: {
-    width: 110,
-    height: 110,
-    marginRight: 15,
-    marginTop: 17,
-    backgroundColor: "#fff",
-    borderRadius: 10,
+    width: 100,
+    height: 100,
+    resizeMode: "contain",
   },
   infoContainer: {
     flex: 1,
@@ -415,7 +309,7 @@ const styles = StyleSheet.create({
     borderColor: "#203165",
     width: "40%",
     //alignSelf: "center",
-    left:40,
+    left: 40,
     marginTop: 15,
   },
   allButton: {
@@ -433,7 +327,7 @@ const styles = StyleSheet.create({
     color: "#FFF", // النص باللون الأبيض
     fontWeight: "bold",
   },
-  
+
   dateButton: {
     paddingVertical: 10,
     paddingHorizontal: 15,
@@ -446,7 +340,7 @@ const styles = StyleSheet.create({
   dateButtonText: {
     fontSize: 16,
     color: "#fff",
-    paddingRight:10
+    paddingRight: 10,
   },
   noResultsText: {
     fontSize: 18,
@@ -464,17 +358,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#e7e7e7",
     padding: 30,
     borderRadius: 10,
-    width: "80%",
-    maxHeight: "80%", // Ensure modal content doesn't overflow
+    width: "100%",
+    maxHeight: "100%", // Ensure modal content doesn't overflow
   },
   modalText1: {
-    marginBottom: 15,
-    textAlign: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
   },
-  modalText: {
-    fontSize: 17,
-    marginBottom: 15,
-    color: "#818183",
+  pres: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#203165",
+    textAlign: "right",
   },
   closeButton: {
     position: "absolute",
@@ -528,6 +425,24 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
   },
+  table:{
+    marginBottom: 20,
+  },
+  tableHeader:{
+    flexDirection: "row",
+    backgroundColor: "#203165",
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginBottom: 5,
+  },
+  tableHeaderCell: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 15,
+    flex: 1,
+    textAlign: "center",
+  }
 });
 
 export default Technicien;

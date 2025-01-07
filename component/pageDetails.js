@@ -10,11 +10,18 @@ import {
   TouchableOpacity,
 } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';  // Import useSelector to access Redux state
+import { useNavigation } from "@react-navigation/native";
 import Header from "./head/header";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import axios from "axios";
+const PageDetails = ({ route }) => {
+  const { product } = route.params;
 
-const PageDetails = () => {
+  const clientID = useSelector((state) => state.client.clientID);
+  console.log('ClientID from Page details :',clientID)
+  
+
   const [number, setNumber] = useState("");
   const [text, setText] = useState("");
   // State for the date pickers
@@ -28,7 +35,7 @@ const PageDetails = () => {
   const handleChange = (event, selectedDate) => {
     if (!selectedDate) {
       setShowPicker(""); // Close the picker when no date is selected
-      return;
+      return; 
     }
 
     // Adjust to handle date and time correctly
@@ -99,49 +106,111 @@ const PageDetails = () => {
   };
 
   const formatDateTime = (date) => {
-    const options = { year: "numeric", month: "short", day: "numeric" };
-    const timeOptions = { hour: "2-digit", minute: "2-digit" };
+    if (!(date instanceof Date)) {
+      console.error("Invalid date object:", date);
+      return null;
+    }
 
-    // Formatting date and time
-    const dateFormatted = date.toLocaleDateString(undefined, options);
-    const timeFormatted = date.toLocaleTimeString(undefined, timeOptions);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12; // Convert to 12-hour format
+    const formattedHours = String(hours).padStart(2, "0"); // Ensure two-digit hour
 
-    return `${dateFormatted} ${timeFormatted}`;
+    const formattedDate = `${year}-${month}-${day} ${formattedHours}:${minutes}${ampm}`;
+
+    //console.log("Formatted date:", formattedDate);  // Log formatted date
+
+    return formattedDate;
   };
-  const backhome = ()=>{
-    navigation.navigate('ClientHome');
+
+  const backhome = () => {
+    navigation.goBack();
+  };
+
+  const [message, setMessage] = useState("");
+  const [messageColor, setMessageColor] = useState(""); // For controlling message color
+  const [messageVisible, setMessageVisible] = useState(false);
+
+  const sendData = async () => {
+  try {
+    // Gather the data to be sent
+    const formData = {
+      user_id: clientID,
+      title: product.name || "Default Title",
+      prix: product.prix,
+      description: product.description,
+      surface: number,
+      date1: formatDateTime(dateTime1),
+      date2: formatDateTime(dateTime2),
+      date3: formatDateTime(dateTime3),
+      date4: formatDateTime(dateTime4),
+      adress: text,
+    };
+
+    console.log('Sending data:', formData); // Log the data being sent
+
+    // Send data to the API
+    const response = await axios.post(
+      "http://192.168.100.150:8000/api/prestations", 
+      formData
+    );
+
+    console.log("Data sent successfully:", response.data); // Log response data
+    const vistid = response.data.id; // Assuming 'id' is returned
+    console.log('Visit ID:', vistid); // Log the visit ID for verification
+
+    // Set success message and color
+    setMessage("Data sent successfully!");
+    setMessageColor("green"); // Green color for success
+    setMessageVisible(true);
+
+    // Navigate to the Marketplace screen with the vistid after 3 seconds
+    setTimeout(() => {
+      setMessageVisible(false);
+      navigation.navigate("Marketplace", { vistid ,clientID});
+    }, 3000);
+  } catch (error) {
+    // Log full error response
+    console.error("Error sending data:", error.response ? error.response.data : error.message);
+    
+    // Set error message and color
+    setMessage("Error sending data. Please try again.");
+    setMessageColor("red"); // Red color for error
+    setMessageVisible(true);
+
+    // Hide the message after 3 seconds
+    setTimeout(() => {
+      setMessageVisible(false);
+    }, 3000);
   }
+};
+
 
   return (
     <View style={styles.screen}>
-      <Header />
+      <Header/>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.title1}>Prestation :</Text>
           <Text style={styles.back1} onPress={backhome}>
-            <AntDesign name="arrowleft" size={24} color="#203165"/>
+            <AntDesign name="arrowleft" size={24} color="#203165" />
             Back
           </Text>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Image
-            source={require("../assets/image/menage.jpg")}
-            style={styles.image}
-          />
+          <Image source={product.image} style={styles.image} />
           <View style={{ alignItems: "center" }}>
-            <Text style={styles.title}>Product 2</Text>
-            <Text style={styles.title}>1000dh</Text>
+            <Text style={styles.title}>{product.name}</Text>
+            <Text style={styles.title}>{product.prix}dh</Text>
           </View>
         </View>
 
         <Text style={styles.descriptionLabel}>Description:</Text>
-        <Text style={styles.descriptionText}>
-          A house cleaner is a professional who specializes in maintaining the
-          cleanliness and organization of residential spaces. Their
-          responsibilities typically include tasks like dusting, vacuuming,
-          mopping floors, sanitizing bathrooms and kitchens, tidying up rooms,
-          and sometimes handling laundry or dishwashing.
-        </Text>
+        <Text style={styles.descriptionText}>{product.description}</Text>
 
         <View style={styles.row}>
           <Text style={styles.label}>Surface:</Text>
@@ -220,15 +289,25 @@ const PageDetails = () => {
         )}
         <Text style={styles.descriptionLabel}>Select Location :</Text>
         <TextInput
-         style={styles.TextInput}
+          style={styles.TextInput}
           placeholder="Type your location "
           onChangeText={(newText) => setText(newText)}
           defaultValue={text}
         />
-        <TouchableOpacity style={styles.valider}>
+        <TouchableOpacity style={styles.valider} onPress={sendData}>
           <Text style={styles.validerText}>Valider</Text>
         </TouchableOpacity>
-        
+        {/* Message Box */}
+        {messageVisible && (
+          <View
+            style={[
+              styles.messageContainer,
+              { backgroundColor: messageColor === "green" ? "green" : "red" },
+            ]}
+          >
+            <Text style={styles.messageText}>{message}</Text>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -294,9 +373,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     flex: 1,
   },
-  TextInput:{
+  TextInput: {
     height: 100,
-    width:'100%',  // You can adjust the height as needed
+    width: "100%", // You can adjust the height as needed
     borderColor: "#203165",
     borderWidth: 1,
     borderRadius: 10,
@@ -339,6 +418,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#203165",
     paddingTop: 15, // Changed `top` to `paddingTop`
+  },
+  messageContainer: {
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+    alignItems: "center",
+  },
+  messageText: {
+    color: "white",
+    fontSize: 16,
   },
 });
 

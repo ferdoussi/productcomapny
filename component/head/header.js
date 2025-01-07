@@ -3,9 +3,13 @@ import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector } from 'react-redux';  // Import useSelector to access Redux state
 
 const Header = () => {
-  const [marketplace] = useState([]);//
+  const clientID = useSelector((state) => state.client.clientID);
+  
+  console.log('ClientID for header : ', clientID)
+  
   const [menuVisible, setMenuVisible] = useState(false);
   const navigation = useNavigation();
 
@@ -49,14 +53,10 @@ const Header = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.marketplaceIcon}
-            onPress={() => navigation.navigate('Marketplace', { marketplace })}
+            onPress={() => navigation.navigate('Store',{clientID})}
           >
             <Icon name="shopping-cart" size={25} color="#fff" />
-            {marketplace.length > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{marketplace.length}</Text>
-              </View>
-            )}
+
           </TouchableOpacity>
         </View>
       </View>

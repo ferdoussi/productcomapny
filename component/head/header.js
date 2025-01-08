@@ -64,10 +64,10 @@ const Header = () => {
       {/* Dropdown Menu */}
       {menuVisible && (
         <View style={styles.menu}>
-          <TouchableOpacity style={styles.menuItem}>
+          {/* <TouchableOpacity style={styles.menuItem}>
             <Icon name="person" size={20} color="#203165" />
             <Text style={styles.menuText}>Profile</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
             <Icon name="logout" size={20} color="#203165" />
             <Text style={styles.menuText}>Logout</Text>

@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useSelector } from 'react-redux';  // Import useSelector to access Redux state
+import { useSelector } from "react-redux"; // Import useSelector to access Redux state
 import { useNavigation } from "@react-navigation/native";
 import Header from "./head/header";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -19,10 +19,10 @@ const PageDetails = ({ route }) => {
   const { product } = route.params;
 
   const clientID = useSelector((state) => state.client.clientID);
-  console.log('ClientID from Page details :',clientID)
-  
+  console.log("ClientID from Page details :", clientID);
 
   const [number, setNumber] = useState("");
+  const [phone, setPhone] = useState("");
   const [text, setText] = useState("");
   // State for the date pickers
   const [showPicker, setShowPicker] = useState(""); // Store picker ID (e.g., 'picker1')
@@ -35,7 +35,7 @@ const PageDetails = ({ route }) => {
   const handleChange = (event, selectedDate) => {
     if (!selectedDate) {
       setShowPicker(""); // Close the picker when no date is selected
-      return; 
+      return;
     }
 
     // Adjust to handle date and time correctly
@@ -136,63 +136,66 @@ const PageDetails = ({ route }) => {
   const [messageVisible, setMessageVisible] = useState(false);
 
   const sendData = async () => {
-  try {
-    // Gather the data to be sent
-    const formData = {
-      user_id: clientID,
-      title: product.name || "Default Title",
-      prix: product.prix,
-      description: product.description,
-      surface: number,
-      date1: formatDateTime(dateTime1),
-      date2: formatDateTime(dateTime2),
-      date3: formatDateTime(dateTime3),
-      date4: formatDateTime(dateTime4),
-      adress: text,
-    };
+    try {
+      // Gather the data to be sent
+      const formData = {
+        user_id: clientID,
+        title: product.name || "Default Title",
+        prix: product.prix,
+        description: product.description,
+        surface: number,
+        date1: formatDateTime(dateTime1),
+        date2: formatDateTime(dateTime2),
+        date3: formatDateTime(dateTime3),
+        date4: formatDateTime(dateTime4),
+        adress: text,
+        telephone: phone,
+      };
 
-    console.log('Sending data:', formData); // Log the data being sent
+      console.log("Sending data:", formData); // Log the data being sent
 
-    // Send data to the API
-    const response = await axios.post(
-      "http://192.168.100.150:8000/api/prestations", 
-      formData
-    );
+      // Send data to the API
+      const response = await axios.post(
+        "http://192.168.100.150:8000/api/prestations",
+        formData
+      );
 
-    console.log("Data sent successfully:", response.data); // Log response data
-    const vistid = response.data.id; // Assuming 'id' is returned
-    console.log('Visit ID:', vistid); // Log the visit ID for verification
+      console.log("Data sent successfully:", response.data); // Log response data
+      const vistid = response.data.id; // Assuming 'id' is returned
+      console.log("Visit ID:", vistid); // Log the visit ID for verification
 
-    // Set success message and color
-    setMessage("Data sent successfully!");
-    setMessageColor("green"); // Green color for success
-    setMessageVisible(true);
+      // Set success message and color
+      setMessage("Data sent successfully!");
+      setMessageColor("green"); // Green color for success
+      setMessageVisible(true);
 
-    // Navigate to the Marketplace screen with the vistid after 3 seconds
-    setTimeout(() => {
-      setMessageVisible(false);
-      navigation.navigate("Marketplace", { vistid ,clientID});
-    }, 3000);
-  } catch (error) {
-    // Log full error response
-    console.error("Error sending data:", error.response ? error.response.data : error.message);
-    
-    // Set error message and color
-    setMessage("Error sending data. Please try again.");
-    setMessageColor("red"); // Red color for error
-    setMessageVisible(true);
+      // Navigate to the Marketplace screen with the vistid after 3 seconds
+      setTimeout(() => {
+        setMessageVisible(false);
+        navigation.navigate("Marketplace", { vistid, clientID });
+      }, 3000);
+    } catch (error) {
+      // Log full error response
+      console.error(
+        "Error sending data:",
+        error.response ? error.response.data : error.message
+      );
 
-    // Hide the message after 3 seconds
-    setTimeout(() => {
-      setMessageVisible(false);
-    }, 3000);
-  }
-};
+      // Set error message and color
+      setMessage("Error sending data. Please try again.");
+      setMessageColor("red"); // Red color for error
+      setMessageVisible(true);
 
+      // Hide the message after 3 seconds
+      setTimeout(() => {
+        setMessageVisible(false);
+      }, 3000);
+    }
+  };
 
   return (
     <View style={styles.screen}>
-      <Header/>
+      <Header />
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.title1}>Prestation :</Text>
@@ -223,6 +226,18 @@ const PageDetails = ({ route }) => {
             onChangeText={(text) => setNumber(text.replace(/[^0-9.]/g, ""))}
           />
           <Text style={styles.label}> M² </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Phone :</Text>
+          
+          <TextInput
+            style={styles.inputInline}
+            placeholder="Type Your Phone"
+            keyboardType="numeric"
+            value={phone}
+            onChangeText={(text) => setPhone(text.replace(/[^0-9]/g, ""))}
+          />
+          <Text style={styles.label}>       </Text>
         </View>
 
         {/* Date Inputs */}

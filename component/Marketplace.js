@@ -202,11 +202,14 @@ const Marketplace = ({ route }) => {
           }}
         />
       </View>
-
+<View>
+  <Text>Tel:</Text>
+  <Text>{marketplaceData.telephone}</Text>
+</View>
       {/* Total */}
       <View style={styles.totalContainer}>
         <Text style={styles.totalLabel}>Total HT:</Text>
-        <Text style={styles.totalValue}>{marketplaceData?.prix} DH</Text>
+        <Text style={styles.totalValue}>{marketplaceData.prix} DH</Text>
       </View>
 
       {/* Company Info and Description */}

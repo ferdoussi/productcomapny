@@ -25,16 +25,17 @@ const Store = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const url = `http://192.168.100.150:8000/api/prestations/${clientID}`;
+        const url = `http://192.168.100.150:8000/api/prestation-notSend/${clientID}`;
         const response = await axios.get(url);
   
         if (response.data && Array.isArray(response.data)) {
           const formattedData = response.data.map(item => ({
-            id: item.id,
+            id: item.vistID,
             title: item.title,
             prix: item.prix,
             surface: item.surface,
             address: item.adress,
+            
           }));
   
           setProducts(formattedData);
@@ -59,9 +60,9 @@ const Store = () => {
   
 
 
-  const handleContinue = (vistid) => {
-    console.log('passing vistid and userid',vistid,clientID)
-    navigation.navigate("Marketplace", { vistid,clientID });
+  const handleContinue = (vistID) => {
+    console.log('passing vistid and userid',vistID,clientID)
+    navigation.navigate("Marketplace", { vistID,clientID });
   };
 
   if (!clientID) {
@@ -81,7 +82,7 @@ const Store = () => {
       <Header/>
       <ScrollView style={styles.container}>
         {products.map(product => (
-          <View key={product.id} style={styles.cardContainer}>
+          <View key={product.vistID} style={styles.cardContainer}>
             <View style={styles.infoContainer}>
               <Text style={styles.title}>{product.title || "No Title Available"}</Text>
               <Text style={styles.price}>Prix: {product.prix || "N/A"}</Text>

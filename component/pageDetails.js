@@ -161,8 +161,8 @@ const PageDetails = ({ route }) => {
       );
 
       console.log("Data sent successfully:", response.data); // Log response data
-      const vistid = response.data.id; // Assuming 'id' is returned
-      console.log("Visit ID:", vistid); // Log the visit ID for verification
+      const vistID = response.data.id; // Assuming 'id' is returned
+      console.log("Visit ID:", vistID); // Log the visit ID for verification
 
       // Set success message and color
       setMessage("Data sent successfully!");
@@ -172,7 +172,7 @@ const PageDetails = ({ route }) => {
       // Navigate to the Marketplace screen with the vistid after 3 seconds
       setTimeout(() => {
         setMessageVisible(false);
-        navigation.navigate("Marketplace", { vistid, clientID });
+        navigation.navigate("Marketplace", { vistID, clientID });
       }, 3000);
     } catch (error) {
       // Log full error response

@@ -1,28 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from "react-native";
-import { useNavigation } from '@react-navigation/native'; // استيراد useNavigation
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native"; // استيراد useNavigation
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Header from "./head/header";
-import { useSelector } from 'react-redux'; // استيراد useSelector للوصول إلى الحالة من Redux
+import { useSelector } from "react-redux"; // استيراد useSelector للوصول إلى الحالة من Redux
 import axios from "axios";
 
 const Marketplace = ({ route }) => {
-  const { vistid } = route.params || {};
+  const { vistID } = route.params || {};
   const clientID = useSelector((state) => state.client.clientID);
-  console.log('ClientID from Page MarketPlace :', clientID);
-  console.log("Marketplace vist", vistid);
+  console.log("ClientID from Page MarketPlace :", clientID);
+  console.log("Marketplace vist", vistID);
 
   const [marketplaceData, setMarketplaceData] = useState([]); // حالة البيانات
   const [error, setError] = useState(null); // حالة الخطأ
   const [message, setMessage] = useState(null); // حالة الرسالة للعرض
   const navigation = useNavigation(); // الوصول إلى التنقل
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log(`Fetching data for vistid: ${vistid}`);
+        console.log(`Fetching data for vistid: ${vistID}`);
         const response = await axios.get(
-          `http://192.168.100.150:8000/api/prestation/${vistid}`
+          `http://192.168.100.150:8000/api/prestation/${vistID}`
         );
 
         console.log("Response Status:", response.status);
@@ -31,41 +39,68 @@ const Marketplace = ({ route }) => {
         setMarketplaceData(response.data);
         console.log("Updated marketplaceData state:", response.data);
       } catch (err) {
-        console.error("Error fetching data:", err.response ? err.response.data : err.message);
+        console.error(
+          "Error fetching data:",
+          err.response ? err.response.data : err.message
+        );
         setError("Failed to fetch data.");
       }
     };
 
     fetchData();
-  }, [vistid]);
+  }, [vistID]);
 
   if (error) {
     return <Text>{error}</Text>;
   }
 
-  // دالة حذف العنصر
-  const handleDelete = async (id) => {
-    console.log("Deleting item with id:", id);
-    setMarketplaceData((prevData) => {
-      if (Array.isArray(prevData)) {
-        return prevData.filter((item) => item.id !== id); // حذف العنصر من الواجهة
-      }
-      return [];
-    });
+//Delete element function
+  
+const handleDelete = async (id) => {
+  console.log("Deleting item with id:", id);
 
-    try {
-      const response = await axios.delete(`http://192.168.100.150:8000/api/prestations/${id}`);
-      console.log("Item deleted from database:", response.data);
+  // Show confirmation alert before deleting
+  Alert.alert(
+    "Confirm Deletion",
+    "Are you sure you want to delete this item?",
+    [
+      {
+        text: "Cancel",
+        onPress: () => console.log("Deletion canceled"),
+        style: "cancel"
+      },
+      {
+        text: "OK",
+        onPress: async () => {
+          setMarketplaceData((prevData) => {
+            if (Array.isArray(prevData)) {
+              return prevData.filter((item) => item.id !== id); // حذف العنصر من الواجهة
+            }
+            return [];
+          });
 
-      if (response.status === 200) {
-        console.log("Item successfully deleted");
-        navigation.navigate("ClientHome", { clientID });
+          try {
+            const response = await axios.delete(
+              `http://192.168.100.150:8000/api/prestations/${id}`
+            );
+            console.log("Item deleted from database:", response.data);
+
+            if (response.status === 200) {
+              console.log("Item successfully deleted");
+              navigation.navigate("ClientHome", { clientID });
+            }
+          } catch (err) {
+            console.error(
+              "Error deleting item:",
+              err.response ? err.response.data : err.message
+            );
+            setError("Failed to delete item.");
+          }
+        }
       }
-    } catch (err) {
-      console.error("Error deleting item:", err.response ? err.response.data : err.message);
-      setError("Failed to delete item.");
-    }
-  };
+    ]
+  );
+};
 
   const handleSendData = async () => {
     try {
@@ -79,21 +114,74 @@ const Marketplace = ({ route }) => {
         date2: formatDate(marketplaceData.date2),
         date3: formatDate(marketplaceData.date3),
         date4: formatDate(marketplaceData.date4),
+        vistID:marketplaceData.id
       };
 
-      const response = await axios.post("http://192.168.100.150:8000/api/send-prestations", formattedData);
+      const response = await axios.post(
+        "http://192.168.100.150:8000/api/send-prestations",
+        formattedData
+      );
 
       if (response.status === 200 || response.status === 201) {
         console.log("Data sent successfully:", response.data);
         setMessage({ text: "Data sent successfully!", type: "success" });
-        navigation.navigate('ClientHome');
+        navigation.navigate("ClientHome",{vistID});
       } else {
         console.error("Unexpected response status:", response.status);
         setMessage({ text: "Failed to send data.", type: "error" });
       }
     } catch (err) {
-      console.error("Error sending data:", err.response ? err.response.data : err.message);
-      setMessage({ text: `Failed to send data. ${err.response ? err.response.data : err.message}`, type: "error" });
+      console.error(
+        "Error sending data:",
+        err.response ? err.response.data : err.message
+      );
+      setMessage({
+        text: `Failed to send data. ${
+          err.response ? err.response.data : err.message
+        }`,
+        type: "error",
+      });
+    }
+  };
+  const SendData = async () => {
+    try {
+      console.log("Sending data to API...");
+
+      // التأكد من تنسيق التواريخ
+      const formattedData = {
+        ...marketplaceData,
+        total: marketplaceData.total || 0, // Ensure the total is included
+        date1: formatDate(marketplaceData.date1),
+        date2: formatDate(marketplaceData.date2),
+        date3: formatDate(marketplaceData.date3),
+        date4: formatDate(marketplaceData.date4),
+        vistID:marketplaceData.id
+      };
+
+      const response = await axios.post(
+        "http://192.168.100.150:8000/api/prestation-notSend",
+        formattedData
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        console.log("Data sent successfully:", response.data);
+        setMessage({ text: "Data sent successfully!", type: "success" });
+        navigation.navigate("Store");
+      } else {
+        console.error("Unexpected response status:", response.status);
+        setMessage({ text: "Failed to send data.", type: "error" });
+      }
+    } catch (err) {
+      console.error(
+        "Error sending data:",
+        err.response ? err.response.data : err.message
+      );
+      setMessage({
+        text: `Failed to send data. ${
+          err.response ? err.response.data : err.message
+        }`,
+        type: "error",
+      });
     }
   };
 
@@ -102,7 +190,7 @@ const Marketplace = ({ route }) => {
 
     let hour = formattedDate.getHours();
     const minute = ("0" + formattedDate.getMinutes()).slice(-2);
-    let ampm = hour >= 12 ? 'PM' : 'AM';
+    let ampm = hour >= 12 ? "PM" : "AM";
 
     // Convert to 12-hour format
     if (hour === 0) {
@@ -135,7 +223,7 @@ const Marketplace = ({ route }) => {
     // Time part
     const hours = date.getHours();
     const minutes = date.getMinutes();
-    const period = hours >= 12 ? 'PM' : 'AM';
+    const period = hours >= 12 ? "PM" : "AM";
     const formattedHours = hours % 12 || 12; // Convert to 12-hour format
     const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
     const formattedTime = `${formattedHours}:${formattedMinutes} ${period}`;
@@ -151,13 +239,22 @@ const Marketplace = ({ route }) => {
       {/* Header Information */}
       <View style={styles.header1}>
         <Image source={require("../assets/logo1.png")} style={styles.logo} />
-        <Text style={styles.title}>Demande Prestation {marketplaceData.id}</Text>
+        <Text style={styles.title}>
+          Demande Prestation {marketplaceData.id}
+        </Text>
       </View>
       <Text style={styles.date}>Ville, le ../../....</Text>
 
       {/* Message Display */}
       {message && (
-        <Text style={[styles.message, message.type === 'success' ? styles.successMessage : styles.errorMessage]}>
+        <Text
+          style={[
+            styles.message,
+            message.type === "success"
+              ? styles.successMessage
+              : styles.errorMessage,
+          ]}
+        >
           {message.text}
         </Text>
       )}
@@ -189,7 +286,7 @@ const Marketplace = ({ route }) => {
               <View style={styles.tableRow}>
                 <Text style={styles.tableCell}>{item.title}</Text>
                 <Text style={styles.tableCell}>{item.prix} DH</Text>
-                <Text style={styles.tableCell}>{item.adress}</Text> 
+                <Text style={styles.tableCell}>{item.adress}</Text>
                 <Text style={styles.tableCell}>{item.surface}</Text>
                 <TouchableOpacity
                   style={styles.deleteButton}
@@ -202,10 +299,10 @@ const Marketplace = ({ route }) => {
           }}
         />
       </View>
-<View>
-  <Text>Tel:</Text>
-  <Text>{marketplaceData.telephone}</Text>
-</View>
+      <View>
+        <Text>Tel:</Text>
+        <Text>{marketplaceData.telephone}</Text>
+      </View>
       {/* Total */}
       <View style={styles.totalContainer}>
         <Text style={styles.totalLabel}>Total HT:</Text>
@@ -226,13 +323,17 @@ const Marketplace = ({ route }) => {
           <Text>Description:</Text>
           <Text>{marketplaceData?.description}</Text>
         </View>
-        
       </View>
 
       {/* Submit Button */}
-      <TouchableOpacity style={styles.sendButton} onPress={handleSendData}>
-        <Text style={styles.sendButtonText}>Envoyer</Text>
-      </TouchableOpacity>
+      <View style={styles.button}>
+        <TouchableOpacity style={styles.sendButton} onPress={handleSendData}>
+          <Text style={styles.sendButtonText}>Envoyer</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.sendButton2} onPress={SendData} >
+          <Text style={styles.sendButtonText}>Ajouter</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -355,16 +456,44 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   sendButton: {
+    backgroundColor: "green", // Bright yellow for button background
+    paddingVertical: 15, // Vertical padding for a tall button
+    paddingHorizontal: 20, // Horizontal padding for added width
+    borderRadius: 8, // Rounded corners
+    alignItems: "center", // Center-align content horizontally
+    justifyContent: "center", // Center-align content vertically
+    shadowColor: "#000", // Add shadow for better appearance
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3, // Shadow on Android
+  },
+  sendButton2: {
     backgroundColor: "#FBBF46",
     paddingVertical: 15,
+    paddingHorizontal: 20,
     borderRadius: 8,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "center", // Center-align content vertically
+    position: "absolute", // For absolute positioning
+    right: 40, // Move button 50px to the right
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  button: {
+    flexDirection: "row", // Align buttons in a horizontal row
+    justifyContent: "space-between", // Space buttons evenly
+    alignItems: "center", // Center-align buttons vertically
+    paddingHorizontal: 10, // Add some padding between buttons
   },
   sendButtonText: {
-    fontSize: 18,
-    color: "#203165",
-    fontWeight: "bold",
+    fontSize: 18, // Slightly larger font size
+    color: "white", // Dark blue text color for contrast
+    fontWeight: "bold", // Bold text for emphasis
+    textTransform: "uppercase", // Make text uppercase for style
   },
 });
 

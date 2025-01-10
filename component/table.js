@@ -36,7 +36,7 @@ console.log('table vist',vistID)
 
     const handleContinue = (vistID) => {
       console.log('passing vistid and userid table',vistID,clientID)
-      navigation.navigate("Marketplace", { vistID,clientID });
+      navigation.navigate("ShowPrestation",{vistID,clientID}); 
     };
   
     if (!clientID) {

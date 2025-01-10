@@ -11,6 +11,7 @@ import { store } from './redux/store';
 import Marketplace from './component/Marketplace';
 import PageDetails from './component/pageDetails'
 import Store from './component/store';
+import ShowPrestation from './component/showscreen/showPrestation';
 const Stack = createStackNavigator();
 const AppNavigator = () => {
 
@@ -24,6 +25,7 @@ const AppNavigator = () => {
         <Stack.Screen name="PageDetails" component={PageDetails}  options={{ headerShown: false }}/>
         <Stack.Screen name="Marketplace" component={Marketplace} options={{ headerShown: false }}/>
         <Stack.Screen name="Store" component={Store} options={{ headerShown: false }}/>
+        <Stack.Screen name="ShowPrestation" component={ShowPrestation} options={{ headerShown: false }}/>
     </Stack.Navigator>
   );
 };

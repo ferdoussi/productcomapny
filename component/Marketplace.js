@@ -20,11 +20,31 @@ const Marketplace = ({ route }) => {
   console.log("ClientID from Page MarketPlace :", clientID);
   console.log("Marketplace vist", vistID);
 
+  const products = useSelector((state) => state.product.products);
+  const [matchFound, setMatchFound] = useState(false);
+
   const [marketplaceData, setMarketplaceData] = useState([]); // حالة البيانات
   const [error, setError] = useState(null); // حالة الخطأ
   const [message, setMessage] = useState(null); // حالة الرسالة للعرض
   const navigation = useNavigation(); // الوصول إلى التنقل
 
+
+  useEffect(() => {
+    console.log("Current vistID:", vistID);
+    console.log("Products from Redux:", products);
+
+    // Check if any product matches the current vistID
+    const matchingProduct = products.find((product) => product.id === vistID);
+
+    if (matchingProduct) {
+      console.log("Matching product found:", matchingProduct);
+      setMatchFound(true);
+    } else {
+      console.log("No matching product found for vistID:", vistID);
+      setMatchFound(false);
+    }
+  }, [vistID, products]);
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -87,7 +107,7 @@ const handleDelete = async (id) => {
 
             if (response.status === 200) {
               console.log("Item successfully deleted");
-              navigation.navigate("ClientHome", { clientID });
+              navigation.navigate("ClientHome", { clientID ,vistID});
             }
           } catch (err) {
             console.error(
@@ -102,47 +122,105 @@ const handleDelete = async (id) => {
   );
 };
 
+  // const handleSendData = async () => {
+  //   try {
+  //     console.log("Sending data to API...");
+
+  //     // التأكد من تنسيق التواريخ
+  //     const formattedData = {
+  //       ...marketplaceData,
+  //       total: marketplaceData.total || 0, // Ensure the total is included
+  //       date1: formatDate(marketplaceData.date1),
+  //       date2: formatDate(marketplaceData.date2),
+  //       date3: formatDate(marketplaceData.date3),
+  //       date4: formatDate(marketplaceData.date4),
+  //       vistID:marketplaceData.id
+  //     };
+
+  //     const response = await axios.post(
+  //       "http://192.168.100.150:8000/api/send-prestations",
+  //       formattedData
+  //     );
+
+  //     if (response.status === 200 || response.status === 201) {
+  //       console.log("Data sent successfully:", response.data);
+  //       setMessage({ text: "Data sent successfully!", type: "success" });
+  //       navigation.navigate("ClientHome",{vistID});
+  //     } else {
+  //       console.error("Unexpected response status:", response.status);
+  //       setMessage({ text: "Failed to send data.", type: "error" });
+  //     }
+  //   } catch (err) {
+  //     console.error(
+  //       "Error sending data:",
+  //       err.response ? err.response.data : err.message
+  //     );
+  //     setMessage({
+  //       text: `Failed to send data. ${
+  //         err.response ? err.response.data : err.message
+  //       }`,
+  //       type: "error",
+  //     });
+  //   }
+  // };
+
+
+
   const handleSendData = async () => {
     try {
       console.log("Sending data to API...");
-
-      // التأكد من تنسيق التواريخ
+  
+      // Log the marketplaceData to ensure it's populated correctly
+      console.log("Original marketplaceData:", marketplaceData);
+  
+      // Format the data before sending it to the API
       const formattedData = {
         ...marketplaceData,
-        total: marketplaceData.total || 0, // Ensure the total is included
+        total: marketplaceData.total || 0, // Ensure total is included
         date1: formatDate(marketplaceData.date1),
         date2: formatDate(marketplaceData.date2),
         date3: formatDate(marketplaceData.date3),
         date4: formatDate(marketplaceData.date4),
-        vistID:marketplaceData.id
+        vistID: marketplaceData.id, // Use the correct vistID
       };
-
+  
+      // Log the formatted data before sending
+      console.log("Payload being sent:", formattedData);
+  
+      // Check if vistID is missing from the formatted data
+      if (!formattedData.vistID) {
+        console.error("vistID is missing from the payload.");
+        setMessage({ text: "vistID is missing from the data.", type: "error" });
+        return; // Exit early if vistID is missing
+      }
+  
+      // Send the data to the API
       const response = await axios.post(
         "http://192.168.100.150:8000/api/send-prestations",
         formattedData
       );
-
+  
+      // Check the response status and handle accordingly
       if (response.status === 200 || response.status === 201) {
         console.log("Data sent successfully:", response.data);
         setMessage({ text: "Data sent successfully!", type: "success" });
-        navigation.navigate("ClientHome",{vistID});
+        navigation.navigate("ClientHome", { vistID });
       } else {
         console.error("Unexpected response status:", response.status);
         setMessage({ text: "Failed to send data.", type: "error" });
       }
     } catch (err) {
-      console.error(
-        "Error sending data:",
-        err.response ? err.response.data : err.message
-      );
+      // Handle errors and display message accordingly
+      console.error("Error sending data:", err.response ? err.response.data : err.message);
       setMessage({
-        text: `Failed to send data. ${
-          err.response ? err.response.data : err.message
-        }`,
+        text: `Failed to send data. ${err.response ? err.response.data : err.message}`,
         type: "error",
       });
     }
   };
+  
+  
+  
   const SendData = async () => {
     try {
       console.log("Sending data to API...");
@@ -330,7 +408,17 @@ const handleDelete = async (id) => {
         <TouchableOpacity style={styles.sendButton} onPress={handleSendData}>
           <Text style={styles.sendButtonText}>Envoyer</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.sendButton2} onPress={SendData} >
+        {/* <TouchableOpacity style={styles.sendButton2} onPress={SendData} >
+          <Text style={styles.sendButtonText}>Ajouter</Text>
+        </TouchableOpacity> */}
+        <TouchableOpacity
+          style={[
+            styles.sendButton2,
+            matchFound && styles.disabledButton, // Apply disabled style if matchFound is true
+          ]}
+          onPress={SendData}
+          disabled={matchFound} // Disable the button if matchFound is true
+        >
           <Text style={styles.sendButtonText}>Ajouter</Text>
         </TouchableOpacity>
       </View>
@@ -384,6 +472,9 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     backgroundColor: "#ffffff",
+  },
+  disabledButton: {
+    backgroundColor: 'grey', // Grey background when disabled
   },
   companyInfo1: {
     marginBottom: 20,

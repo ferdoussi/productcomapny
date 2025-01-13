@@ -204,7 +204,7 @@ const handleDelete = async (id) => {
       if (response.status === 200 || response.status === 201) {
         console.log("Data sent successfully:", response.data);
         setMessage({ text: "Data sent successfully!", type: "success" });
-        navigation.navigate("ClientHome", { vistID });
+        navigation.navigate("ClientHome", { vistID,clientID });
       } else {
         console.error("Unexpected response status:", response.status);
         setMessage({ text: "Failed to send data.", type: "error" });
@@ -408,9 +408,6 @@ const handleDelete = async (id) => {
         <TouchableOpacity style={styles.sendButton} onPress={handleSendData}>
           <Text style={styles.sendButtonText}>Envoyer</Text>
         </TouchableOpacity>
-        {/* <TouchableOpacity style={styles.sendButton2} onPress={SendData} >
-          <Text style={styles.sendButtonText}>Ajouter</Text>
-        </TouchableOpacity> */}
         <TouchableOpacity
           style={[
             styles.sendButton2,

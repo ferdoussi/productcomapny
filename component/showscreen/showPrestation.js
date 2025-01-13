@@ -7,21 +7,19 @@ import { useSelector } from "react-redux";
 const ShowPrestation = ({ route }) => {
   const { vistID } = route.params || {};
   const clientID = useSelector((state) => state.client.clientID);
-  console.log("ClientID from Page show :", clientID);
-  console.log("show vist", vistID);
 
-  const [data, setData] = useState([]); // Assuming marketplaceData is passed as a prop
+  const [data, setData] = useState([]);
 
   const fetchData = async () => {
     try {
-      console.log("Fetching data...");
+      console.log("Fetching data for vistID:", vistID);
       const response = await axios.get(
         `http://192.168.100.150:8000/api/send-prestations/${vistID}`
       );
       console.log("API Response:", response.data);
 
       if (Array.isArray(response.data)) {
-        setData(response.data); // Set data to state
+        setData(response.data);
       } else {
         console.error("Unexpected API response format:", response.data);
       }
@@ -33,25 +31,21 @@ const ShowPrestation = ({ route }) => {
   useEffect(() => {
     fetchData();
   }, [vistID]);
+
   const formatDateAndTime = (dateString) => {
     const date = new Date(dateString);
-
-    // Date part
     const day = date.getDate();
-    const month = date.getMonth() + 1; // months are zero-indexed
+    const month = date.getMonth() + 1;
     const year = date.getFullYear();
     const formattedDay = day < 10 ? `0${day}` : day;
     const formattedMonth = month < 10 ? `0${month}` : month;
     const formattedDate = `${formattedDay}/${formattedMonth}/${year}`;
-
-    // Time part
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const period = hours >= 12 ? "PM" : "AM";
-    const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+    const formattedHours = hours % 12 || 12;
     const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
     const formattedTime = `${formattedHours}:${formattedMinutes} ${period}`;
-
     return `${formattedDate} ${formattedTime}`;
   };
 
@@ -85,19 +79,21 @@ const ShowPrestation = ({ route }) => {
           <Text style={styles.tableHeaderCell}>Prix</Text>
           <Text style={styles.tableHeaderCell}>Adress</Text>
           <Text style={styles.tableHeaderCell}>Surface</Text>
+          <Text style={styles.tableHeaderCell}>Phone</Text>
         </View>
 
         <FlatList
-          data={data} // Use the data from state
+          data={data}
           renderItem={({ item }) => (
             <View style={styles.tableRow}>
               <Text style={styles.tableCell}>{item.title}</Text>
               <Text style={styles.tableCell}>{item.prix}</Text>
               <Text style={styles.tableCell}>{item.adress}</Text>
               <Text style={styles.tableCell}>{item.surface}</Text>
+              <Text style={styles.tableCell}>{item.telephone}</Text>
             </View>
           )}
-          keyExtractor={(item) => item.id.toString()} // Ensure each item has a unique key
+          keyExtractor={(item) => item.id.toString()}
         />
       </View>
 

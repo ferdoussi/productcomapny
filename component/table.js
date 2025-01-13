@@ -14,25 +14,25 @@ console.log('table vist',vistID)
   // Function to fetch data using Axios
   const fetchData = async () => {
     try {
-      console.log("Fetching data...");  // Log when fetch starts
-      const response = await axios.get(`http://192.168.100.150:8000/api/send-prestations`);
-      console.log("API Response:", response.data);  // Log the API response
-      
-      if (response.data && response.data.data) {
-        setData(response.data.data);  // Access the data from the 'data' key
+      console.log("Fetching data..."); // Log when fetch starts
+      const response = await axios.get(`http://192.168.100.150:8000/api/send-prestation/${clientID}`);
+      console.log("API Response:", response.data); // Log the API response
+  
+      // Check if the response is an array
+      if (Array.isArray(response.data)) {
+        setData(response.data); // Set the data directly
       } else {
         console.error("Unexpected API response format:", response.data);
-        
       }
     } catch (error) {
-      console.error("Error fetching data:", error.message);  // Log the error message
-      
+      console.error("Error fetching data:", error.message); // Log the error message
     }
   };
-
+  
   useEffect(() => {
     fetchData();
   }, []);
+  
 
     const handleContinue = (vistID) => {
       console.log('passing vistid and userid table',vistID,clientID)
@@ -46,7 +46,7 @@ console.log('table vist',vistID)
 
   return (
     <ScrollView style={styles.table}>
-      <Text style={styles.id}>Table:</Text>
+      <Text style={styles.id}>Table Prestations :</Text>
       <View style={styles.name}>
         <View style={styles.row}>
           <Text style={styles.cellHeader}>N!</Text>
@@ -63,7 +63,7 @@ console.log('table vist',vistID)
       <Text style={styles.cell}>{item.title}</Text>
       <Text style={styles.cell}>{item.prix}</Text>
       <Text style={{ color: "orange", width: "30%" }}>{item.status || "No Status"}</Text>
-      <TouchableOpacity onPress={() => handleContinue(item.id)}>
+      <TouchableOpacity onPress={() => handleContinue(item.vistID)}>
         <Icon name="eye" size={20} color="#203165" />
       </TouchableOpacity>
     </View>
@@ -117,14 +117,13 @@ const styles = StyleSheet.create({
     color: "#203165", // Dark blue color for title
     fontWeight: "bold",
     marginBottom: 10, // Spacing below the title
-  },
+  }, 
   noDataText: {
-    noDataText: {
-      textAlign: "center", // Centered text
-      color: "#999", // Light gray color
-      marginTop: 20, // Added margin on top to space it out
-      fontSize: 16,
-  }
+    fontSize: 16,
+    color: '#555',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    margin: 10,
   },
 });
 

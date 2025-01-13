@@ -7,7 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Modal,
-  TextInput,
+  FlatList,
 } from "react-native";
 import HeaderTechnicien from "./headerTechnicien/headerTechnicien";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -15,36 +15,30 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
 import Entypo from "@expo/vector-icons/Entypo";
 import { Linking, Platform } from "react-native"; // Use React Native's Linking module
-
+import {  useSelector } from "react-redux"; // Import useDispatch from redux
 const Technicien = () => {
+  const clientID = useSelector((state) => state.client.clientID);
+  console.log('technicien',clientID)
   const [searchQuery, setSearchQuery] = useState(""); // Date selected by user
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false); // To show date picker
   const [selectedDate, setSelectedDate] = useState(null); // Store selected date
   // modal
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [text, setText] = useState(""); // Store the input text
-  // change prix
-  const [number, setNumber] = useState("");
+
   // Array of items to be mapped
   const items = [
     {
-      id: 1,
+      id: 183,
       date: "22/12/2024 | 8:00AM-10:00AM",
       title: "Menage",
       price: "1000DH",
       surface: "15M²",
       address: "10 Bd de la Liberté",
       image: require("./assets/image/menage.jpg"),
-    },
-    {
-      id: 2,
-      date: "23/12/2024 | 9:00AM-11:00AM",
-      title: "Cleaning",
-      price: "1200DH",
-      surface: "20M²",
-      address: "15 Bd de Paris",
-      image: require("./assets/image/plb.jpg"),
+      clientName: "anas Ferdoussi",
+      description: "menage",
+      phone: "2948811488",
     },
   ];
 
@@ -70,17 +64,10 @@ const Technicien = () => {
   };
 
   const getRandomColor = () => {
-    const colors = ["#203165", "#2C4A74", "#1F2C3B", "#263340", "#2A3D54"];
+    const colors = ["green"];
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
-  const calculateTotalPrice = (originalPrice, addedPrice) => {
-    const originalPriceNumeric = parseFloat(
-      originalPrice.replace("DH", "").trim()
-    );
-    const addedPriceNumeric = parseFloat(addedPrice || 0);
-    return originalPriceNumeric + addedPriceNumeric;
-  };
   // function for google maps
   const openGoogleMaps = (address) => {
     const encodedAddress = encodeURIComponent(address);
@@ -164,10 +151,9 @@ const Technicien = () => {
                     }}
                   />
                 </Text>
+                <Text style={styles.title}>Prestation {item.id}</Text>
                 <Text style={styles.title}>{item.date}</Text>
-                <Text style={styles.subtitle}>Title :{item.title}</Text>
-                <Text style={styles.subtitle}>Prix : {item.price}</Text>
-                <Text style={styles.detailsText}>Surface : {item.surface}</Text>
+                <Text style={styles.subtitle}>Name : {item.clientName}</Text>
                 <View style={styles.detailsContainer}>
                   <Text style={styles.detailsText}>{item.address}</Text>
                 </View>
@@ -192,17 +178,49 @@ const Technicien = () => {
                         source={require("./assets/logo1.png")}
                         style={styles.image2}
                       />
-                      <Text style={styles.pres}>Prestation N°</Text>
+                      <Text style={styles.pres}>Prestation {item.id}</Text>
                     </View>
+                    {/* Company Information */}
+                    <View style={styles.companyInfo}>
+                      <Text>INOVTEAM</Text>
+                      <Text>10 Bd de la Liberté, Casablanca 20120</Text>
+                      <Text>CASABLANCA, .......</Text>
+                      <Text>+212 652963481</Text>
+                      <Text>Email@gmail.com</Text>
+                    </View>
+                    {/* Table */}
                     <View style={styles.table}>
                       <View style={styles.tableHeader}>
                         <Text style={styles.tableHeaderCell}>Title</Text>
-                        <Text style={styles.tableHeaderCell}>Prix </Text>
-                        <Text style={styles.tableHeaderCell}>Localisation</Text>
-                        <Text style={styles.tableHeaderCell}>Action</Text>
+                        <Text style={styles.tableHeaderCell}>Prix</Text>
+                        <Text style={styles.tableHeaderCell}>Phone</Text>
+                        <Text style={styles.tableHeaderCell}>Surface</Text>
                       </View>
+                      <FlatList
+                        data={selectedItem ? [selectedItem] : []} // Ensure data is passed correctly
+                        keyExtractor={(item, index) => index.toString()}
+                        renderItem={({ item }) => (
+                          <View style={styles.tableRow}>
+                            <Text style={styles.tableCell}>
+                              {item.title || "N/A"}
+                            </Text>
+                            <Text style={styles.tableCell}>
+                              {item.price || "N/A"} DH
+                            </Text>
+                            <Text style={styles.tableCell}>
+                              {item.phone || "N/A"}
+                            </Text>
+                            <Text style={styles.tableCell}>
+                              {item.surface || "N/A"}
+                            </Text>
+                          </View>
+                        )}
+                      />
                     </View>
-
+                    <View style={styles.totalContainer}>
+                      <Text style={styles.totalLabel}>Total HT:</Text>
+                      <Text style={styles.totalValue}> DH</Text>
+                    </View>
                     <TouchableOpacity
                       onPress={() => setModalVisible(false)}
                       style={styles.closeButton}
@@ -211,9 +229,21 @@ const Technicien = () => {
                         <AntDesign name="close" size={24} color="black" />
                       </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.envoyerButton}>
-                      <Text style={styles.TextenvoyerButton}>Send</Text>
-                    </TouchableOpacity>
+                    {/* Company Info and Description */}
+                    <View style={styles.companyInfo1}>
+                      <View style={styles.dates}>
+                        <Text>Dates:</Text>
+                        <Text>{item.date}</Text>
+                        <Text></Text>
+                        <Text></Text>
+                        <Text></Text>
+                      </View>
+                      <View style={styles.divider}></View>
+                      <View style={styles.comm}>
+                        <Text>Description:</Text>
+                        <Text>{item.description}</Text>
+                      </View>
+                    </View>
                   </View>
                 </View>
               </Modal>
@@ -254,7 +284,8 @@ const styles = StyleSheet.create({
     marginRight: 15,
     borderRadius: 10, // Optional: add border radius to the image
     marginTop: 30,
-    marginLeft: 15,
+    marginLeft: 10,
+    bottom: 15,
   },
   image2: {
     width: 100,
@@ -268,7 +299,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   title: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: "bold",
     color: "#fff",
   },
@@ -356,9 +387,9 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: "#e7e7e7",
-    padding: 30,
+    padding: 20,
     borderRadius: 10,
-    width: "100%",
+    width: "90%",
     maxHeight: "100%", // Ensure modal content doesn't overflow
   },
   modalText1: {
@@ -425,10 +456,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
   },
-  table:{
+  table: {
     marginBottom: 20,
   },
-  tableHeader:{
+  tableHeader: {
     flexDirection: "row",
     backgroundColor: "#203165",
     paddingVertical: 12,
@@ -442,7 +473,83 @@ const styles = StyleSheet.create({
     fontSize: 15,
     flex: 1,
     textAlign: "center",
-  }
+  },
+  companyInfo: {
+    marginBottom: 20,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: "#ffffff",
+  },
+  table: {
+    marginBottom: 20,
+  },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#203165",
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginBottom: 5,
+  },
+  tableHeaderCell: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    flex: 1,
+    textAlign: "center",
+  },
+  tableRow: {
+    flexDirection: "row",
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  tableCell: {
+    fontSize: 14,
+    flex: 1,
+    textAlign: "center",
+    color: "#333",
+  },
+  totalContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginBottom: 20,
+    marginTop: 20,
+  },
+  totalLabel: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#203165",
+  },
+  totalValue: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#f39c12",
+    marginLeft: 10,
+  },
+  companyInfo1: {
+    marginBottom: 20,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: "#ffffff",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  dates: {
+    flex: 1,
+    marginRight: 10,
+  },
+  divider: {
+    width: 1,
+    backgroundColor: "#203165",
+    height: "100%",
+    marginHorizontal: 10,
+  },
+  comm: {
+    flex: 1,
+  },
 });
 
 export default Technicien;

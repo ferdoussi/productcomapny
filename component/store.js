@@ -68,7 +68,7 @@ const Store = () => {
     const fetchProducts = async () => {
       try {
         const url = `http://192.168.100.150:8000/api/prestation-notSend/${clientID}`;
-        const response = await axios.get(url);
+        const response = await axios.get(url); 
   
         if (response.data && Array.isArray(response.data.data)) {
           const formattedData = response.data.data
@@ -130,6 +130,7 @@ const Store = () => {
       <ScrollView style={styles.container}>
         {products.length === 0 ? (
           <Text style={styles.noProductsText}>No active products available.</Text>
+          
         ) : (
           products.map((product,index) => (
             <View key={index} style={styles.cardContainer}>
@@ -212,6 +213,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#f0f0f0",
   },
+  noProductsText: {
+    fontSize: 18,
+    color: '#888',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    margin: 20,
+  }
 });
 
 export default Store;

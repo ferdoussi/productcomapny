@@ -1,23 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView ,TouchableOpacity} from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import axios from "axios";
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { useSelector } from 'react-redux';  // Import useSelector to access Redux state
+import Icon from "react-native-vector-icons/FontAwesome";
+import { useSelector } from "react-redux"; // Import useSelector to access Redux state
 import { useNavigation } from "@react-navigation/native"; // Import navigation hook
 const TableExample = (vistID) => {
-console.log('table vist',vistID)
+  console.log("table vist", vistID);
 
   const [data, setData] = useState([]);
   const clientID = useSelector((state) => state.client.clientID);
-  console.log('table id',clientID)
+  console.log("table id", clientID);
   const navigation = useNavigation();
   // Function to fetch data using Axios
   const fetchData = async () => {
     try {
       console.log("Fetching data..."); // Log when fetch starts
-      const response = await axios.get(`http://192.168.100.150:8000/api/send-prestation/${clientID}`);
+      const response = await axios.get(
+        `http://192.168.100.150:8000/api/send-prestation/${clientID}`
+      );
       console.log("API Response:", response.data); // Log the API response
-  
+
       // Check if the response is an array
       if (Array.isArray(response.data)) {
         setData(response.data); // Set the data directly
@@ -28,21 +36,19 @@ console.log('table vist',vistID)
       console.error("Error fetching data:", error.message); // Log the error message
     }
   };
-  
+
   useEffect(() => {
     fetchData();
   }, []);
-  
 
-    const handleContinue = (vistID) => {
-      console.log('passing vistid and userid table',vistID,clientID)
-      navigation.navigate("ShowPrestation",{vistID,clientID}); 
-    };
-  
-    if (!clientID) {
-      return <Text>No valid user ID provided.</Text>;
-    }
-  
+  const handleContinue = (vistID) => {
+    console.log("passing vistid and userid table", vistID, clientID);
+    navigation.navigate("ShowPrestation", { vistID, clientID });
+  };
+
+  if (!clientID) {
+    return <Text>No valid user ID provided.</Text>;
+  }
 
   return (
     <ScrollView style={styles.table}>
@@ -57,21 +63,33 @@ console.log('table vist',vistID)
         </View>
         {/* Render Data Rows */}
         {data.length > 0 ? (
-  data.map((item, index) => (
-    <View key={`${item.vistID}-${index}`} style={styles.row}>
-      <Text style={styles.cell}>{item.vistID}</Text>
-      <Text style={styles.cell}>{item.title}</Text>
-      <Text style={styles.cell}>{item.prix}</Text>
-      <Text style={{ color: "orange", width: "30%" }}>{item.status || "No Status"}</Text>
-      <TouchableOpacity onPress={() => handleContinue(item.vistID)}>
-        <Icon name="eye" size={20} color="#203165" />
-      </TouchableOpacity>
-    </View>
-  ))
-) : (
-  <Text style={styles.noDataText}>No data available</Text>
-)}
+          data.map((item, index) => (
+            <View key={`${item.vistID}-${index}`} style={styles.row}>
+              <Text style={styles.cell}>{item.vistID}</Text>
+              <Text style={styles.cell}>{item.title}</Text>
+              <Text style={styles.cell}>{item.prix}</Text>
+              <Text
+                style={{
+                  color:
+                    item.status === "en cours"
+                      ? "orange"
+                      : item.status === "planifier"
+                      ? "blue"
+                      : "black",
+                  width: "30%",
+                }}
+              >
+                {item.status || "No Status"}
+              </Text>
 
+              <TouchableOpacity onPress={() => handleContinue(item.vistID)}>
+                <Icon name="eye" size={20} color="#203165" />
+              </TouchableOpacity>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noDataText}>No data available</Text>
+        )}
       </View>
     </ScrollView>
   );
@@ -117,12 +135,12 @@ const styles = StyleSheet.create({
     color: "#203165", // Dark blue color for title
     fontWeight: "bold",
     marginBottom: 10, // Spacing below the title
-  }, 
+  },
   noDataText: {
     fontSize: 16,
-    color: '#555',
-    textAlign: 'center',
-    fontStyle: 'italic',
+    color: "#555",
+    textAlign: "center",
+    fontStyle: "italic",
     margin: 10,
   },
 });

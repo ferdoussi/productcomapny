@@ -21,6 +21,7 @@
     "@shopify/react-native-skia": "^1.5.0",
     "@types/react-native-modern-datepicker": "^1.0.5",
     "axios": "^1.7.7",
+    "crypto": "^1.0.1",
     "expo": "~52.0.25",
     "expo-linking": "~7.0.4",
     "expo-local-authentication": "~15.0.2",
@@ -31,8 +32,11 @@
     "react-native-animatable": "^1.4.0",
     "react-native-async-storage": "^0.0.1",
     "react-native-chart-kit": "^6.12.0",
+    "react-native-geolocation-service": "^5.3.1",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-get-random-values": "^1.11.0",
+    "react-native-google-places-autocomplete": "^2.5.7",
+    "react-native-maps": "^1.20.1",
     "react-native-modal-datetime-picker": "^18.0.0",
     "react-native-modern-datepicker": "^1.0.0-beta.91",
     "react-native-paper": "^5.12.5",
@@ -46,11 +50,17 @@
     "react-navigation": "^5.0.0",
     "react-redux": "^9.2.0",
     "redux-thunk": "^3.1.0",
+    "uuid": "^11.0.5",
     "victory-native": "^41.12.0",
     "yup": "^1.4.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0",
+    "@babel/cli": "^7.26.4",
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.26.3",
+    "babel-jest": "^29.7.0",
+    "react-native-dotenv": "^3.4.11",
     "typescript": "^5.3.3"
   },
   "private": true

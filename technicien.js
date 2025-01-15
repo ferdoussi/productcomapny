@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,82 +14,119 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
 import Entypo from "@expo/vector-icons/Entypo";
-import { Linking, Platform } from "react-native"; // Use React Native's Linking module
-import {  useSelector } from "react-redux"; // Import useDispatch from redux
+import { Linking, Platform } from "react-native";
+import { useSelector } from "react-redux";
+
 const Technicien = () => {
   const clientID = useSelector((state) => state.client.clientID);
-  console.log('technicien',clientID)
-  const [searchQuery, setSearchQuery] = useState(""); // Date selected by user
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false); // To show date picker
-  const [selectedDate, setSelectedDate] = useState(null); // Store selected date
-  // modal
+  console.log("Technician Client ID:", clientID);
+
+  const [prestations, setPrestations] = useState([]); // State for storing fetched prestations
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Array of items to be mapped
-  const items = [
-    {
-      id: 183,
-      date: "22/12/2024 | 8:00AM-10:00AM",
-      title: "Menage",
-      price: "1000DH",
-      surface: "15M²",
-      address: "10 Bd de la Liberté",
-      image: require("./assets/image/menage.jpg"),
-      clientName: "anas Ferdoussi",
-      description: "menage",
-      phone: "2948811488",
-    },
-  ];
+  // Add this function above your useEffect or inside the component
+const getCurrentDateTime = () => {
+  const currentDateTime = moment();  // Get the current date and time
+  return currentDateTime.format('DD/MM/YYYY hh:mm A');  // Format as "15/01/2025 02:30 PM"
+};
 
-  // Function to filter items based on the selected date
-  const filteredItems = searchQuery
-    ? items.filter((item) => {
-        const itemDate = item.date.split(" | ")[0]; // Extract the date portion
-        return itemDate === searchQuery; // Compare with the selected date
-      })
-    : items; // Show all items if no date is selected
+useEffect(() => {
+  const fetchPrestations = async () => {
+    try {
+      console.log("Fetching prestations data...");
+      const response = await fetch(
+        `http://192.168.100.150:8000/api/prestations_techniciens/${clientID}`
+      );
 
-  // Show date picker
-  const showDatePicker = () => setDatePickerVisibility(true);
-  // Hide date picker
-  const hideDatePicker = () => setDatePickerVisibility(false);
+      console.log("Response Status:", response.status);
 
-  // Handle date selection
-  const handleConfirm = (date) => {
-    const formattedDate = moment(date).format("DD/MM/YYYY"); // Format date to DD/MM/YYYY
-    setSelectedDate(formattedDate);
-    setSearchQuery(formattedDate); // Update search query with the selected date
-    hideDatePicker();
+      if (!response.ok) {
+        throw new Error(
+          `Network response was not ok: ${response.statusText}`
+        );
+      }
+
+      const result = await response.json();
+      console.log("Fetched data:", result);
+
+      // Check if result.data is an object or array
+      if (result.data) {
+        const prestationsData = Array.isArray(result.data)
+          ? result.data
+          : [result.data]; // Wrap in an array if it's a single object
+        setPrestations(prestationsData);
+      } else {
+        setPrestations([]); // No data found
+      }
+    } catch (error) {
+      console.error("Error fetching prestations:", error);
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getRandomColor = () => {
-    const colors = ["green"];
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
+  if (clientID) {
+    fetchPrestations();
+  }
+}, [clientID]);
 
-  // function for google maps
+if (loading) return <Text>Loading...</Text>;
+if (error) return <Text>Error: {error.message}</Text>;
+
+// Filter items based on the selected date
+const filteredItems = searchQuery
+  ? prestations.filter((item) => {
+      console.log(
+        "Item Date:",
+        item.date_prestation,
+        "Search Query:",
+        searchQuery
+      ); // Debugging line
+      return item.date_prestation === searchQuery; // Compare the dates directly
+    })
+  : prestations;
+
+// Show date picker
+const showDatePicker = () => setDatePickerVisibility(true);
+// Hide date picker
+const hideDatePicker = () => setDatePickerVisibility(false);
+
+// Handle date selection
+const handleConfirm = (date) => {
+  const formattedDate = moment(date).local().format("DD/MM/YYYY hh:mm A");
+  setSelectedDate(formattedDate);
+  setSearchQuery(formattedDate);
+  hideDatePicker();
+};
+
+// Display current date and time
+const currentDateTime = getCurrentDateTime();
+console.log('Current Date and Time:', currentDateTime); // Logs the current date and time
+
+
+  // Function for Google Maps
   const openGoogleMaps = (address) => {
     const encodedAddress = encodeURIComponent(address);
-    console.log(encodedAddress);
-
     let url;
 
     if (Platform.OS === "ios") {
-      // URL to open Apple Maps in iOS
       url = `maps://?q=${encodedAddress}`;
     } else if (Platform.OS === "android") {
-      // URL to open Google Maps on Android
       url = `geo:0,0?q=${encodedAddress}`;
     }
 
-    // Check if the application supports opening the link
     Linking.canOpenURL(url)
       .then((supported) => {
         if (supported) {
           Linking.openURL(url);
         } else {
-          // If the application is not supported, open the link in the browser
           const fallbackUrl = `https://www.google.com/maps/search/?q=${encodedAddress}`;
           Linking.openURL(fallbackUrl);
         }
@@ -100,7 +137,6 @@ const Technicien = () => {
   return (
     <View style={styles.screen}>
       <HeaderTechnicien />
-
       {/* Date Picker Button */}
       <View style={styles.searchContainer}>
         <TouchableOpacity onPress={showDatePicker} style={styles.dateButton}>
@@ -127,18 +163,15 @@ const Technicien = () => {
       {/* List of filtered items */}
       <ScrollView contentContainerStyle={styles.cardsWrapper}>
         {filteredItems.length > 0 ? (
-          filteredItems.map((item, index) => (
+          filteredItems.map((item,index) => (
             <View
-              key={item.id}
-              style={[
-                styles.cardContainer,
-                {
-                  backgroundColor: getRandomColor(), // Random color for each item
-                },
-              ]}
+              key={item.index}
+              style={[styles.cardContainer, { backgroundColor: "green" }]}
             >
-              <Image source={item.image} style={styles.image} />
-
+              <Image
+                source={require("./assets/image/menage.jpg")}
+                style={styles.image}
+              />
               <View style={styles.infoContainer}>
                 <Text style={styles.file}>
                   <AntDesign
@@ -146,24 +179,28 @@ const Technicien = () => {
                     size={24}
                     color="black"
                     onPress={() => {
-                      setSelectedItem(item); // Stocke l'élément sélectionné
-                      setModalVisible(true); // Ouvre le modal
+                      setSelectedItem(item);
+                      setModalVisible(true);
                     }}
                   />
                 </Text>
-                <Text style={styles.title}>Prestation {item.id}</Text>
-                <Text style={styles.title}>{item.date}</Text>
-                <Text style={styles.subtitle}>Name : {item.clientName}</Text>
+                <Text style={styles.title}>
+                  Prestation {item.vistID}
+                </Text>
+                <Text style={styles.title}>{currentDateTime}</Text>
+                <Text style={styles.subtitle}>Name: {item.userName}</Text>
                 <View style={styles.detailsContainer}>
-                  <Text style={styles.detailsText}>{item.address}</Text>
+                  <Text style={styles.detailsText}>{item.adress}</Text>
                 </View>
                 <Text
                   style={styles.detailsText1}
-                  onPress={() => openGoogleMaps(item.address)}
+                  onPress={() => openGoogleMaps(item.adress)}
                 >
                   <Entypo name="location" size={24} color="white" />
                 </Text>
               </View>
+
+              {/* Modal */}
               {/* Modal */}
               <Modal
                 animationType="slide"
@@ -178,7 +215,7 @@ const Technicien = () => {
                         source={require("./assets/logo1.png")}
                         style={styles.image2}
                       />
-                      <Text style={styles.pres}>Prestation {item.id}</Text>
+                      <Text style={styles.pres}>Prestation {item.vistID}</Text>
                     </View>
                     {/* Company Information */}
                     <View style={styles.companyInfo}>
@@ -205,10 +242,10 @@ const Technicien = () => {
                               {item.title || "N/A"}
                             </Text>
                             <Text style={styles.tableCell}>
-                              {item.price || "N/A"} DH
+                              {item.prix || "N/A"} DH
                             </Text>
                             <Text style={styles.tableCell}>
-                              {item.phone || "N/A"}
+                              {item.telephone || "N/A"}
                             </Text>
                             <Text style={styles.tableCell}>
                               {item.surface || "N/A"}
@@ -219,7 +256,7 @@ const Technicien = () => {
                     </View>
                     <View style={styles.totalContainer}>
                       <Text style={styles.totalLabel}>Total HT:</Text>
-                      <Text style={styles.totalValue}> DH</Text>
+                      <Text style={styles.totalValue}>{item.prix} DH</Text>
                     </View>
                     <TouchableOpacity
                       onPress={() => setModalVisible(false)}
@@ -233,10 +270,8 @@ const Technicien = () => {
                     <View style={styles.companyInfo1}>
                       <View style={styles.dates}>
                         <Text>Dates:</Text>
-                        <Text>{item.date}</Text>
-                        <Text></Text>
-                        <Text></Text>
-                        <Text></Text>
+                        <Text>{currentDateTime}</Text>
+                        
                       </View>
                       <View style={styles.divider}></View>
                       <View style={styles.comm}>
@@ -339,23 +374,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#203165",
     width: "40%",
-    //alignSelf: "center",
     left: 40,
     marginTop: 15,
   },
   allButton: {
     paddingVertical: 10,
     paddingHorizontal: 15,
-    backgroundColor: "#203165", // لون مميز للزر
+    backgroundColor: "#203165", // Distinct color for button
     borderRadius: 20,
-    width: "90%", // عرض مناسب
+    width: "90%", // Appropriate width
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 10, // مسافة بين الأزرار
+    marginLeft: 10, // Margin between buttons
   },
   allButtonText: {
     fontSize: 16,
-    color: "#FFF", // النص باللون الأبيض
+    color: "#FFF", // White text
     fontWeight: "bold",
   },
 
@@ -392,17 +426,11 @@ const styles = StyleSheet.create({
     width: "90%",
     maxHeight: "100%", // Ensure modal content doesn't overflow
   },
-  modalText1: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
   pres: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#203165",
-    textAlign: "right",
+    right:10
   },
   closeButton: {
     position: "absolute",
@@ -416,70 +444,33 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
   },
-  inputInline: {
-    height: 40,
-    width: "100%",
-    borderColor: "#203165",
-    borderWidth: 1,
-    borderRadius: 12,
-    marginTop: 10,
-    paddingLeft: 10,
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
-  textChange: {
-    fontSize: 20,
-    marginBottom: 10,
-    color: "#203165",
-  },
-  textArea: {
-    height: 100,
-    width: "100%",
-    borderColor: "#203165",
-    borderWidth: 1,
+  modalContent: {
+    backgroundColor: "#e7e7e7",
+    padding: 20,
     borderRadius: 10,
-    padding: 15,
-    textAlignVertical: "top",
+    width: "90%",
+    maxHeight: "100%", // Ensure modal content doesn't overflow
   },
-  totle: {
-    fontSize: 20,
-    textAlign: "center",
-    color: "#203165",
-    marginTop: 15,
-  },
-  envoyerButton: {
-    backgroundColor: "#203165",
-    marginTop: 8,
-    paddingVertical: 10,
-    borderRadius: 5,
-  },
-  TextenvoyerButton: {
-    color: "#fff",
-    fontSize: 18,
-    textAlign: "center",
-  },
-  table: {
+  modalText1: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 20,
   },
-  tableHeader: {
-    flexDirection: "row",
-    backgroundColor: "#203165",
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    marginBottom: 5,
-  },
-  tableHeaderCell: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 15,
-    flex: 1,
-    textAlign: "center",
-  },
+
   companyInfo: {
     marginBottom: 20,
     padding: 10,
     borderRadius: 8,
     backgroundColor: "#ffffff",
   },
+
   table: {
     marginBottom: 20,
   },

@@ -8,6 +8,7 @@ import {
   TextInput,
   Platform,
   TouchableOpacity,
+
 } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useSelector } from "react-redux"; // Import useSelector to access Redux state
@@ -15,9 +16,10 @@ import { useNavigation } from "@react-navigation/native";
 import Header from "./head/header";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import axios from "axios";
+
 const PageDetails = ({ route }) => {
   const { product } = route.params;
-
+  console.log(API_KEY)
   const clientID = useSelector((state) => state.client.clientID);
   console.log("ClientID from Page details :", clientID);
 
@@ -37,6 +39,7 @@ const PageDetails = ({ route }) => {
       setShowPicker(""); // Close the picker when no date is selected
       return;
     }
+  
 
     // Adjust to handle date and time correctly
     const updatedDate = new Date(selectedDate);
@@ -192,6 +195,8 @@ const PageDetails = ({ route }) => {
       }, 3000);
     }
   };
+    
+
 
   return (
     <View style={styles.screen}>
@@ -229,7 +234,7 @@ const PageDetails = ({ route }) => {
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Phone :</Text>
-          
+
           <TextInput
             style={styles.inputInline}
             placeholder="Type Your Phone"
@@ -237,7 +242,7 @@ const PageDetails = ({ route }) => {
             value={phone}
             onChangeText={(text) => setPhone(text.replace(/[^0-9]/g, ""))}
           />
-          <Text style={styles.label}>       </Text>
+          <Text style={styles.label}> </Text>
         </View>
 
         {/* Date Inputs */}
@@ -308,7 +313,9 @@ const PageDetails = ({ route }) => {
           placeholder="Type your location "
           onChangeText={(newText) => setText(newText)}
           defaultValue={text}
+          
         />
+  
         <TouchableOpacity style={styles.valider} onPress={sendData}>
           <Text style={styles.validerText}>Valider</Text>
         </TouchableOpacity>
@@ -397,6 +404,30 @@ const styles = StyleSheet.create({
     padding: 15,
     textAlignVertical: "top",
   },
+  textInput: {
+    borderWidth: 1,
+    borderColor: "black",
+    height: 50,
+    paddingLeft: 25,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  textInputFocused: {
+    borderWidth: 1,
+    borderColor: "black",
+    height: 50,
+    paddingLeft: 25,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  autocompleteContainer: {
+    width: "95%",
+  },
+
   inputButton: {
     borderWidth: 1,
     borderColor: "#203165",

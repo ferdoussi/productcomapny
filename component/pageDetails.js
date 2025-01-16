@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,7 +8,6 @@ import {
   TextInput,
   Platform,
   TouchableOpacity,
-
 } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useSelector } from "react-redux"; // Import useSelector to access Redux state
@@ -16,10 +15,13 @@ import { useNavigation } from "@react-navigation/native";
 import Header from "./head/header";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import axios from "axios";
+import * as Location from "expo-location";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Entypo from '@expo/vector-icons/Entypo';
 
 const PageDetails = ({ route }) => {
   const { product } = route.params;
-  console.log(API_KEY)
+
   const clientID = useSelector((state) => state.client.clientID);
   console.log("ClientID from Page details :", clientID);
 
@@ -34,12 +36,81 @@ const PageDetails = ({ route }) => {
   const [dateTime3, setDateTime3] = useState(new Date());
   const [dateTime4, setDateTime4] = useState(new Date()); // Added fourth date
   const navigation = useNavigation();
+  const [visible, setVisible] = useState(false);
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [address, setAddress] = useState(null);
+
+  // Function to load address from AsyncStorage
+  const loadAddress = async () => {
+    try {
+      const savedAddress = await AsyncStorage.getItem("address");
+      if (savedAddress) {
+        const parsedAddress = JSON.parse(savedAddress);
+        setAddress(parsedAddress);
+        setText(parsedAddress.formattedAddress); // Optional: set the text state to the formattedAddress
+      }
+    } catch (error) {
+      console.log("Error loading address", error);
+    }
+  };
+
+  // Call loadAddress when the component mounts
+  useEffect(() => {
+    loadAddress();
+  }, []);
+
+  const getLocation = async () => {
+    // Request permission to access location
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setErrorMsg("Permission to access location was denied");
+      Alert.alert("Error", "Permission to access location was denied");
+      return;
+    }
+
+    // Get current location
+    try {
+      let currentLocation = await Location.getCurrentPositionAsync({});
+      console.log("ana hena ", currentLocation);
+      setLocation(currentLocation);
+
+      // Call reverse geocoding function with the coordinates
+      const { latitude, longitude } = currentLocation.coords;
+      console.log("long", longitude);
+      console.log("lat", latitude);
+
+      getAddress(latitude, longitude);
+      setVisible(!visible);
+    } catch (error) {
+      setErrorMsg("Unable to fetch location");
+      Alert.alert("Error", "Unable to fetch location");
+    }
+  };
+
+  //2
+  const getAddress = async (latitude, longitude) => {
+    try {
+      let [result] = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude,
+      });
+
+      console.log("casa", result);
+      // Save result in AsyncStorage
+      await AsyncStorage.setItem("address", JSON.stringify(result)); // Store the result as a string
+
+      setAddress(result);
+    } catch (error) {
+      Alert.alert("Error", "Failed to fetch the address");
+    }
+  };
+
   const handleChange = (event, selectedDate) => {
     if (!selectedDate) {
       setShowPicker(""); // Close the picker when no date is selected
       return;
     }
-  
 
     // Adjust to handle date and time correctly
     const updatedDate = new Date(selectedDate);
@@ -195,8 +266,6 @@ const PageDetails = ({ route }) => {
       }, 3000);
     }
   };
-    
-
 
   return (
     <View style={styles.screen}>
@@ -307,15 +376,21 @@ const PageDetails = ({ route }) => {
             onChange={handleChange}
           />
         )}
-        <Text style={styles.descriptionLabel}>Select Location :</Text>
-        <TextInput
-          style={styles.TextInput}
-          placeholder="Type your location "
-          onChangeText={(newText) => setText(newText)}
-          defaultValue={text}
-          
-        />
-  
+      
+          <Text style={styles.descriptionLabel}>Select Location :</Text>
+          <View style={{flexDirection:'row'}}>
+          {visible && (
+            <TextInput
+              style={styles.TextInput}
+              placeholder="Type your location"
+              onChangeText={(newText) => setText(newText)}
+              value={text || address.formattedAddress} // This ensures the formatted address is used as default if `text` is empty
+            />
+          )}
+          <TouchableOpacity style={styles.location} onPress={getLocation}>
+            <Text style={styles.validerText}><Entypo name="location-pin" size={50} color="white" /></Text>
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity style={styles.valider} onPress={sendData}>
           <Text style={styles.validerText}>Valider</Text>
         </TouchableOpacity>
@@ -396,8 +471,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   TextInput: {
-    height: 100,
-    width: "100%", // You can adjust the height as needed
+    height: 80,
+    width: "80%", // You can adjust the height as needed
     borderColor: "#203165",
     borderWidth: 1,
     borderRadius: 10,
@@ -451,6 +526,11 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignSelf: "center", // Added to center the button horizontally
     top: 10,
+  },
+  location:{
+    backgroundColor:'#203165',
+    marginLeft:10,
+    borderRadius:20
   },
   validerText: {
     color: "#203165",

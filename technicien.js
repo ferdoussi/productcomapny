@@ -133,6 +133,46 @@ console.log('Current Date and Time:', currentDateTime); // Logs the current date
       })
       .catch((err) => console.error("An error occurred: ", err));
   };
+  const formatTime = (dateString) => {
+    console.log("Original Date String:", dateString);  // Log the input date string
+  
+    // Manually parse the date and time (16/01/2025 12:27 PM)
+    const [datePart, timePart] = dateString.split(' ');
+    const [day, month, year] = datePart.split('/');
+    let [hours, minutes] = timePart.split(':');
+    const period = timePart.split(' ')[1];  // AM/PM
+  
+    // Convert the day, month, year, and time to a valid JavaScript Date object
+    let parsedDate = new Date(`${year}-${month}-${day}T${hours}:${minutes}:00`);
+  
+    // Adjust for AM/PM
+    if (period === 'PM' && hours !== '12') {
+      parsedDate.setHours(parsedDate.getHours() + 12);  // Add 12 hours for PM if not 12 PM
+    } else if (period === 'AM' && hours === '12') {
+      parsedDate.setHours(0);  // Set hour to 0 for 12 AM
+    }
+  
+    // Manually adjust the time by adding 2 hours (if needed)
+    parsedDate.setHours(parsedDate.getHours() + 2); // Adjust for timezone difference
+  
+    if (isNaN(parsedDate.getTime())) {
+      console.error("Invalid date format:", dateString);
+      return "Invalid Time";  // Return error message if the date is invalid
+    }
+  
+    // Convert to 12-hour format
+    let formattedHours = parsedDate.getHours() % 12;
+    formattedHours = formattedHours ? formattedHours : 12; // The hour '0' should be '12'
+    const formattedMinutes = parsedDate.getMinutes() < 10 ? '0' + parsedDate.getMinutes() : parsedDate.getMinutes();
+    const ampm = parsedDate.getHours() >= 12 ? 'PM' : 'AM';
+  
+    // Log the adjusted and formatted time
+    const formattedTime = `${formattedHours}:${formattedMinutes} ${ampm}`;
+    console.log("Formatted Time:", formattedTime); // Log the formatted time
+  
+    return formattedTime;
+  }
+  
 
   return (
     <View style={styles.screen}>
@@ -187,7 +227,7 @@ console.log('Current Date and Time:', currentDateTime); // Logs the current date
                 <Text style={styles.title}>
                   Prestation {item.vistID}
                 </Text>
-                <Text style={styles.title}>{currentDateTime}</Text>
+                <Text style={styles.title}>{currentDateTime} |   {formatTime(currentDateTime)} </Text>
                 <Text style={styles.subtitle}>Name: {item.userName}</Text>
                 <View style={styles.detailsContainer}>
                   <Text style={styles.detailsText}>{item.adress}</Text>

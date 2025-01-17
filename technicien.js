@@ -16,7 +16,7 @@ import moment from "moment";
 import Entypo from "@expo/vector-icons/Entypo";
 import { Linking, Platform } from "react-native";
 import { useSelector } from "react-redux";
-
+import axios from "axios";
 const Technicien = () => {
   const clientID = useSelector((state) => state.client.clientID);
   console.log("Technician Client ID:", clientID);
@@ -33,39 +33,41 @@ const Technicien = () => {
   // Add this function above your useEffect or inside the component
 const getCurrentDateTime = () => {
   const currentDateTime = moment();  // Get the current date and time
-  return currentDateTime.format('DD/MM/YYYY hh:mm A');  // Format as "15/01/2025 02:30 PM"
+  return currentDateTime.format('YYYY/MM/DD hh:mm A');  // Format as "15/01/2025 02:30 PM"
 };
 
 useEffect(() => {
   const fetchPrestations = async () => {
     try {
       console.log("Fetching prestations data...");
+      
+      // استدعاء API
       const response = await fetch(
         `http://192.168.100.150:8000/api/prestations_techniciens/${clientID}`
       );
 
       console.log("Response Status:", response.status);
 
+      // تحقق من حالة الاستجابة
       if (!response.ok) {
-        throw new Error(
-          `Network response was not ok: ${response.statusText}`
-        );
+        throw new Error(`Network response was not ok: ${response.status}`);
       }
 
+      // قراءة البيانات كـ JSON
       const result = await response.json();
       console.log("Fetched data:", result);
 
-      // Check if result.data is an object or array
+      // معالجة البيانات
       if (result.data) {
         const prestationsData = Array.isArray(result.data)
           ? result.data
-          : [result.data]; // Wrap in an array if it's a single object
+          : [result.data]; // إذا كانت كائنًا واحدًا، نضعه في مصفوفة
         setPrestations(prestationsData);
       } else {
-        setPrestations([]); // No data found
+        setPrestations([]); // إذا لم تكن هناك بيانات
       }
     } catch (error) {
-      console.error("Error fetching prestations:", error);
+      console.error("Error fetching prestations:", error.message || error);
       setError(error);
     } finally {
       setLoading(false);
@@ -77,21 +79,69 @@ useEffect(() => {
   }
 }, [clientID]);
 
+
 if (loading) return <Text>Loading...</Text>;
 if (error) return <Text>Error: {error.message}</Text>;
+// Assuming `prestations` is your data array and `searchQuery` is the selected date.
+const formatSearchQuery = (searchQuery) => {
+  try {
+    // Extract parts of the searchQuery
+    const dateParts = searchQuery.split(' ');
+    const [day, month, year] = dateParts[0].split('/'); // "DD/MM/YYYY"
+    const timeParts = dateParts[1].split(':');
+    const hour = parseInt(timeParts[0]);
+    const minute = timeParts[1];
+    const ampm = dateParts[2]; // "AM/PM"
 
-// Filter items based on the selected date
-const filteredItems = searchQuery
+    // Adjust hour based on AM/PM
+    let formattedHour = hour;
+    if (ampm === "PM" && hour < 12) {
+      formattedHour = hour + 12; // Convert PM hours to 24-hour format
+    } else if (ampm === "AM" && hour === 12) {
+      formattedHour = 0; // Midnight case (12 AM => 00:00)
+    }
+
+    // Construct a valid date string in the format YYYY-MM-DD
+    const formattedDate = `${year}-${month}-${day}`;
+    const formattedDateTime = `${formattedDate}T${String(formattedHour).padStart(2, '0')}:${minute}:00`;
+
+    // Return formatted date for comparison
+    return new Date(formattedDateTime).toISOString().split('T')[0]; // YYYY-MM-DD
+  } catch (error) {
+    console.error("Error formatting search query:", error);
+    return null; // Return null if formatting fails
+  }
+};
+
+const formattedSearchQuery = formatSearchQuery(searchQuery);
+
+if (formattedSearchQuery) {
+  const filteredItems = prestations.filter((item) => {
+    const isMatching = item.date_prestation === formattedSearchQuery;
+    return isMatching;
+  });
+
+  console.log("Filtered Items:", filteredItems);
+} else {
+  console.log("Invalid date provided in search query.");
+}
+
+const filteredItems = formattedSearchQuery
   ? prestations.filter((item) => {
       console.log(
-        "Item Date:",
-        item.date_prestation,
-        "Search Query:",
-        searchQuery
-      ); // Debugging line
-      return item.date_prestation === searchQuery; // Compare the dates directly
+        "Item Date:", item.date_prestation,
+        "Formatted Search Query:", formattedSearchQuery
+      ); // Log the item date and the formatted search query
+      const isMatching = item.date_prestation === formattedSearchQuery; 
+      console.log("Match Status:", isMatching); // Log the result of the match check
+      return isMatching;
     })
   : prestations;
+
+console.log("Filtered Items:", filteredItems); // Log the filtered items
+
+
+  
 
 // Show date picker
 const showDatePicker = () => setDatePickerVisibility(true);
@@ -308,14 +358,14 @@ console.log('Current Date and Time:', currentDateTime); // Logs the current date
                     </TouchableOpacity>
                     {/* Company Info and Description */}
                     <View style={styles.companyInfo1}>
-                      <View style={styles.dates}>
+                      {/* <View style={styles.dates}>
                         <Text>Dates:</Text>
                         <Text>{currentDateTime}</Text>
                         
-                      </View>
-                      <View style={styles.divider}></View>
+                      </View> */}
+                      {/* <View style={styles.divider}></View> */}
                       <View style={styles.comm}>
-                        <Text>Description:</Text>
+                        <Text style={styles.description}>Description:</Text>
                         <Text>{item.description}</Text>
                       </View>
                     </View>
@@ -581,6 +631,11 @@ const styles = StyleSheet.create({
   comm: {
     flex: 1,
   },
+  description:{
+    fontSize:20,
+    color:'#203165',
+    fontWeight:'bold'
+  }
 });
 
 export default Technicien;

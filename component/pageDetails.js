@@ -17,7 +17,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import axios from "axios";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Entypo from '@expo/vector-icons/Entypo';
+import Entypo from "@expo/vector-icons/Entypo";
+import { ActivityIndicator } from "react-native";
 
 const PageDetails = ({ route }) => {
   const { product } = route.params;
@@ -40,6 +41,7 @@ const PageDetails = ({ route }) => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [address, setAddress] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // Function to load address from AsyncStorage
   const loadAddress = async () => {
@@ -61,30 +63,39 @@ const PageDetails = ({ route }) => {
   }, []);
 
   const getLocation = async () => {
-    // Request permission to access location
+    setLoading(true); // أظهر مؤشر التحميل عند الضغط على الزر
+    setVisible(false); // أخفِ حقل الإدخال إذا كان ظاهراً
+
+    // طلب الإذن للوصول إلى الموقع
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
       setErrorMsg("Permission to access location was denied");
       Alert.alert("Error", "Permission to access location was denied");
+      setLoading(false); // أخفِ مؤشر التحميل إذا كان هناك خطأ
       return;
     }
 
-    // Get current location
+    // الحصول على الموقع الحالي
     try {
       let currentLocation = await Location.getCurrentPositionAsync({});
-      console.log("ana hena ", currentLocation);
+      console.log("Current location:", currentLocation);
       setLocation(currentLocation);
 
-      // Call reverse geocoding function with the coordinates
+      // استدعاء دالة reverse geocoding باستخدام الإحداثيات
       const { latitude, longitude } = currentLocation.coords;
-      console.log("long", longitude);
-      console.log("lat", latitude);
+      console.log("Longitude:", longitude);
+      console.log("Latitude:", latitude);
 
       getAddress(latitude, longitude);
-      setVisible(!visible);
+
+      setTimeout(() => {
+        setLoading(false); // أخفِ مؤشر التحميل بعد 2 ثانية
+        setVisible(true); // أظهر حقل الإدخال بعد التحميل
+      }, 2000); // مدة التحميل (2 ثانية)
     } catch (error) {
       setErrorMsg("Unable to fetch location");
       Alert.alert("Error", "Unable to fetch location");
+      setLoading(false); // أخفِ مؤشر التحميل في حالة حدوث خطأ
     }
   };
 
@@ -376,19 +387,30 @@ const PageDetails = ({ route }) => {
             onChange={handleChange}
           />
         )}
-      
-          <Text style={styles.descriptionLabel}>Select Location :</Text>
-          <View style={{flexDirection:'row'}}>
-          {visible && (
+
+        <Text style={styles.descriptionLabel}>Select Location :</Text>
+        <View style={{ flexDirection: "row" }}>
+          
+          {loading && <ActivityIndicator size="large" color="#0000ff" />}
+        
+        
+          {!loading && visible && (
             <TextInput
               style={styles.TextInput}
               placeholder="Type your location"
               onChangeText={(newText) => setText(newText)}
-              value={text || address.formattedAddress} // This ensures the formatted address is used as default if `text` is empty
+              value={
+                text ||
+                (location
+                  ? `${location.coords.latitude}, ${location.coords.longitude}`
+                  : "")
+              }
             />
           )}
           <TouchableOpacity style={styles.location} onPress={getLocation}>
-            <Text style={styles.validerText}><Entypo name="location-pin" size={50} color="white" /></Text>
+            <Text style={styles.validerText}>
+              <Entypo name="location-pin" size={50} color="white" />
+            </Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.valider} onPress={sendData}>
@@ -527,10 +549,10 @@ const styles = StyleSheet.create({
     alignSelf: "center", // Added to center the button horizontally
     top: 10,
   },
-  location:{
-    backgroundColor:'#203165',
-    marginLeft:10,
-    borderRadius:20
+  location: {
+    backgroundColor: "#203165",
+    marginLeft: 10,
+    borderRadius: 20,
   },
   validerText: {
     color: "#203165",

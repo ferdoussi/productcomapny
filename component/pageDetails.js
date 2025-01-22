@@ -390,10 +390,8 @@ const PageDetails = ({ route }) => {
 
         <Text style={styles.descriptionLabel}>Select Location :</Text>
         <View style={{ flexDirection: "row" }}>
-          
           {loading && <ActivityIndicator size="large" color="#0000ff" />}
-        
-        
+
           {!loading && visible && (
             <TextInput
               style={styles.TextInput}
@@ -409,7 +407,7 @@ const PageDetails = ({ route }) => {
           )}
           <TouchableOpacity style={styles.location} onPress={getLocation}>
             <Text style={styles.validerText}>
-              <Entypo name="location-pin" size={50} color="white" />
+              <Entypo name="location-pin" size={40} color="white" />
             </Text>
           </TouchableOpacity>
         </View>
@@ -493,7 +491,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   TextInput: {
-    height: 80,
+    height: 90,
     width: "80%", // You can adjust the height as needed
     borderColor: "#203165",
     borderWidth: 1,
@@ -553,6 +551,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#203165",
     marginLeft: 10,
     borderRadius: 20,
+    height: 70,
   },
   validerText: {
     color: "#203165",

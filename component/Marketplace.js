@@ -11,12 +11,14 @@ import {
 import { useNavigation } from "@react-navigation/native"; // استيراد useNavigation
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Header from "./head/header";
-import { useSelector } from "react-redux"; // استيراد useSelector للوصول إلى الحالة من Redux
+import { useSelector ,useDispatch} from "react-redux"; // استيراد useSelector للوصول إلى الحالة من Redux
 import axios from "axios";
-
+import { increment, decrement,reset } from '../redux/counterSlice'; // Make sure to import actions from your slice
 const Marketplace = ({ route }) => {
   const { vistID } = route.params || {};
   const clientID = useSelector((state) => state.client.clientID);
+  const dispatch = useDispatch();
+  //const count = useSelector(state => state.counter.count);  // Assuming you have a counter slice
   console.log("ClientID from Page MarketPlace :", clientID);
   console.log("Marketplace vist", vistID);
 
@@ -75,7 +77,6 @@ const Marketplace = ({ route }) => {
   }
 
 //Delete element function
-  
 const handleDelete = async (id) => {
   console.log("Deleting item with id:", id);
 
@@ -107,7 +108,8 @@ const handleDelete = async (id) => {
 
             if (response.status === 200) {
               console.log("Item successfully deleted");
-              navigation.navigate("ClientHome", { clientID ,vistID});
+              navigation.navigate("ClientHome", { clientID ,vistID})
+              dispatch(decrement());
             }
           } catch (err) {
             console.error(
@@ -205,6 +207,7 @@ const handleDelete = async (id) => {
         console.log("Data sent successfully:", response.data);
         setMessage({ text: "Data sent successfully!", type: "success" });
         navigation.navigate("ClientHome", { vistID,clientID });
+        dispatch(decrement())
       } else {
         console.error("Unexpected response status:", response.status);
         setMessage({ text: "Failed to send data.", type: "error" });
@@ -245,6 +248,7 @@ const handleDelete = async (id) => {
         console.log("Data sent successfully:", response.data);
         setMessage({ text: "Data sent successfully!", type: "success" });
         navigation.navigate("Store");
+        dispatch(increment())
       } else {
         console.error("Unexpected response status:", response.status);
         setMessage({ text: "Failed to send data.", type: "error" });
@@ -357,9 +361,9 @@ const handleDelete = async (id) => {
         </View>
         <FlatList
           data={[marketplaceData]} // wrap the data in an array
-          keyExtractor={(item) => (item.id ? item.id.toString() : item.title)}
+          keyExtractor={(item,index) => (item.id ? item.id.toString() : item.title)}
           renderItem={({ item }) => {
-            console.log("Item:", item);
+            // console.log("Item:", item);
             return (
               <View style={styles.tableRow}>
                 <Text style={styles.tableCell}>{item.title}</Text>
@@ -378,8 +382,8 @@ const handleDelete = async (id) => {
         />
       </View>
       <View>
-        <Text>Tel:</Text>
-        <Text>{marketplaceData.telephone}</Text>
+        <Text style={styles.teltext}>Tel:</Text>
+        <Text style={styles.tel}>{marketplaceData.telephone}</Text>
       </View>
       {/* Total */}
       <View style={styles.totalContainer}>
@@ -523,7 +527,6 @@ const styles = StyleSheet.create({
   tableCell: {
     fontSize: 14,
     flex: 1,
-    textAlign: "center",
     color: "#333",
   },
   totalContainer: {
@@ -542,6 +545,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#f39c12",
     marginLeft: 10,
+  },
+  teltext:{
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#203165",
+    
+  },
+  tel:{
+    fontSize: 18,
+    color: "#f39c12",
+    
   },
   sendButton: {
     backgroundColor: "green", // Bright yellow for button background

@@ -8,15 +8,17 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
+  Platform,
+  Linking,
 } from "react-native";
 import HeaderTechnicien from "./headerTechnicien/headerTechnicien";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
 import Entypo from "@expo/vector-icons/Entypo";
-import { Linking, Platform } from "react-native";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import Feather from "@expo/vector-icons/Feather";
 const Technicien = () => {
   const clientID = useSelector((state) => state.client.clientID);
   console.log("Technician Client ID:", clientID);
@@ -30,136 +32,129 @@ const Technicien = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Add this function above your useEffect or inside the component
-const getCurrentDateTime = () => {
-  const currentDateTime = moment();  // Get the current date and time
-  return currentDateTime.format('YYYY/MM/DD hh:mm A');  // Format as "15/01/2025 02:30 PM"
-};
+  // Add this function above your useEffect or inside the component 
+  const getCurrentDateTime = () => {
+    const currentDateTime = moment(); // Get the current date and time
+    return currentDateTime.format("YYYY/MM/DD hh:mm A"); // Format as "15/01/2025 02:30 PM"
+  };
+  useEffect(() => {
+    const fetchPrestations = async () => {
+      try {
+        console.log("Fetching prestations data...");
 
-useEffect(() => {
-  const fetchPrestations = async () => {
+        // استدعاء API باستخدام axios
+        const response = await axios.get(
+          `http://192.168.100.150:8000/api/prestations_techniciens/${clientID}`
+        );
+
+        console.log("Response Status:", response.status);
+
+        // قراءة البيانات من الاستجابة
+        const result = response.data;
+        console.log("Fetched data:", result);
+
+        // معالجة البيانات
+        if (result.data) {
+          const prestationsData = Array.isArray(result.data)
+            ? result.data
+            : [result.data]; // إذا كانت كائنًا واحدًا، نضعه في مصفوفة
+          setPrestations(prestationsData);
+        } else {
+          setPrestations([]); // إذا لم تكن هناك بيانات
+        }
+      } catch (error) {
+        console.error("Error fetching prestations:", error.message || error);
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (clientID) {
+      fetchPrestations();
+    }
+  }, [clientID]);
+
+  if (loading) return <Text>Loading...</Text>;
+  if (error) return <Text>Error: {error.message}</Text>;
+  // Assuming `prestations` is your data array and `searchQuery` is the selected date.
+  const formatSearchQuery = (searchQuery) => {
     try {
-      console.log("Fetching prestations data...");
-      
-      // استدعاء API
-      const response = await fetch(
-        `http://192.168.100.150:8000/api/prestations_techniciens/${clientID}`
-      );
+      // Extract parts of the searchQuery
+      const dateParts = searchQuery.split(" ");
+      const [day, month, year] = dateParts[0].split("/"); // "DD/MM/YYYY"
+      const timeParts = dateParts[1].split(":");
+      const hour = parseInt(timeParts[0]);
+      const minute = timeParts[1];
+      const ampm = dateParts[2]; // "AM/PM"
 
-      console.log("Response Status:", response.status);
-
-      // تحقق من حالة الاستجابة
-      if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.status}`);
+      // Adjust hour based on AM/PM
+      let formattedHour = hour;
+      if (ampm === "PM" && hour < 12) {
+        formattedHour = hour + 12; // Convert PM hours to 24-hour format
+      } else if (ampm === "AM" && hour === 12) {
+        formattedHour = 0; // Midnight case (12 AM => 00:00)
       }
 
-      // قراءة البيانات كـ JSON
-      const result = await response.json();
-      console.log("Fetched data:", result);
+      // Construct a valid date string in the format YYYY-MM-DD
+      const formattedDate = `${year}-${month}-${day}`;
+      const formattedDateTime = `${formattedDate}T${String(
+        formattedHour
+      ).padStart(2, "0")}:${minute}:00`;
 
-      // معالجة البيانات
-      if (result.data) {
-        const prestationsData = Array.isArray(result.data)
-          ? result.data
-          : [result.data]; // إذا كانت كائنًا واحدًا، نضعه في مصفوفة
-        setPrestations(prestationsData);
-      } else {
-        setPrestations([]); // إذا لم تكن هناك بيانات
-      }
+      // Return formatted date for comparison
+      return new Date(formattedDateTime).toISOString().split("T")[0]; // YYYY-MM-DD
     } catch (error) {
-      console.error("Error fetching prestations:", error.message || error);
-      setError(error);
-    } finally {
-      setLoading(false);
+      // console.error("Error formatting search query:", error);
+      return null; // Return null if formatting fails
     }
   };
 
-  if (clientID) {
-    fetchPrestations();
-  }
-}, [clientID]);
+  const formattedSearchQuery = formatSearchQuery(searchQuery);
 
-
-if (loading) return <Text>Loading...</Text>;
-if (error) return <Text>Error: {error.message}</Text>;
-// Assuming `prestations` is your data array and `searchQuery` is the selected date.
-const formatSearchQuery = (searchQuery) => {
-  try {
-    // Extract parts of the searchQuery
-    const dateParts = searchQuery.split(' ');
-    const [day, month, year] = dateParts[0].split('/'); // "DD/MM/YYYY"
-    const timeParts = dateParts[1].split(':');
-    const hour = parseInt(timeParts[0]);
-    const minute = timeParts[1];
-    const ampm = dateParts[2]; // "AM/PM"
-
-    // Adjust hour based on AM/PM
-    let formattedHour = hour;
-    if (ampm === "PM" && hour < 12) {
-      formattedHour = hour + 12; // Convert PM hours to 24-hour format
-    } else if (ampm === "AM" && hour === 12) {
-      formattedHour = 0; // Midnight case (12 AM => 00:00)
-    }
-
-    // Construct a valid date string in the format YYYY-MM-DD
-    const formattedDate = `${year}-${month}-${day}`;
-    const formattedDateTime = `${formattedDate}T${String(formattedHour).padStart(2, '0')}:${minute}:00`;
-
-    // Return formatted date for comparison
-    return new Date(formattedDateTime).toISOString().split('T')[0]; // YYYY-MM-DD
-  } catch (error) {
-    console.error("Error formatting search query:", error);
-    return null; // Return null if formatting fails
-  }
-};
-
-const formattedSearchQuery = formatSearchQuery(searchQuery);
-
-if (formattedSearchQuery) {
-  const filteredItems = prestations.filter((item) => {
-    const isMatching = item.date_prestation === formattedSearchQuery;
-    return isMatching;
-  });
-
-  console.log("Filtered Items:", filteredItems);
-} else {
-  console.log("Invalid date provided in search query.");
-}
-
-const filteredItems = formattedSearchQuery
-  ? prestations.filter((item) => {
-      console.log(
-        "Item Date:", item.date_prestation,
-        "Formatted Search Query:", formattedSearchQuery
-      ); // Log the item date and the formatted search query
-      const isMatching = item.date_prestation === formattedSearchQuery; 
-      console.log("Match Status:", isMatching); // Log the result of the match check
+  if (formattedSearchQuery) {
+    const filteredItems = prestations.filter((item) => {
+      const isMatching = item.date_prestation === formattedSearchQuery;
       return isMatching;
-    })
-  : prestations;
+    });
 
-console.log("Filtered Items:", filteredItems); // Log the filtered items
+    console.log("Filtered Items:", filteredItems);
+  } else {
+    console.log("Invalid date provided in search query.");
+  }
 
+  const filteredItems = formattedSearchQuery
+    ? prestations.filter((item) => {
+        console.log(
+          "Item Date:",
+          item.date_prestation,
+          "Formatted Search Query:",
+          formattedSearchQuery
+        ); // Log the item date and the formatted search query
+        const isMatching = item.date_prestation === formattedSearchQuery;
+        console.log("Match Status:", isMatching); // Log the result of the match check
+        return isMatching;
+      })
+    : prestations;
 
-  
+  console.log("Filtered Items:", filteredItems); // Log the filtered items
 
-// Show date picker
-const showDatePicker = () => setDatePickerVisibility(true);
-// Hide date picker
-const hideDatePicker = () => setDatePickerVisibility(false);
+  // Show date picker
+  const showDatePicker = () => setDatePickerVisibility(true);
+  // Hide date picker
+  const hideDatePicker = () => setDatePickerVisibility(false);
 
-// Handle date selection
-const handleConfirm = (date) => {
-  const formattedDate = moment(date).local().format("DD/MM/YYYY hh:mm A");
-  setSelectedDate(formattedDate);
-  setSearchQuery(formattedDate);
-  hideDatePicker();
-};
+  // Handle date selection
+  const handleConfirm = (date) => {
+    const formattedDate = moment(date).local().format("DD/MM/YYYY hh:mm A");
+    setSelectedDate(formattedDate);
+    setSearchQuery(formattedDate);
+    hideDatePicker();
+  };
 
-// Display current date and time
-const currentDateTime = getCurrentDateTime();
-console.log('Current Date and Time:', currentDateTime); // Logs the current date and time
-
+  // Display current date and time
+  const currentDateTime = getCurrentDateTime();
+  console.log("Current Date and Time:", currentDateTime); // Logs the current date and time
 
   // Function for Google Maps
   const openGoogleMaps = (address) => {
@@ -184,45 +179,57 @@ console.log('Current Date and Time:', currentDateTime); // Logs the current date
       .catch((err) => console.error("An error occurred: ", err));
   };
   const formatTime = (dateString) => {
-    console.log("Original Date String:", dateString);  // Log the input date string
-  
+    console.log("Original Date String:", dateString); // Log the input date string
+
     // Manually parse the date and time (16/01/2025 12:27 PM)
-    const [datePart, timePart] = dateString.split(' ');
-    const [day, month, year] = datePart.split('/');
-    let [hours, minutes] = timePart.split(':');
-    const period = timePart.split(' ')[1];  // AM/PM
-  
+    const [datePart, timePart] = dateString.split(" ");
+    const [day, month, year] = datePart.split("/");
+    let [hours, minutes] = timePart.split(":");
+    const period = timePart.split(" ")[1]; // AM/PM
+
     // Convert the day, month, year, and time to a valid JavaScript Date object
     let parsedDate = new Date(`${year}-${month}-${day}T${hours}:${minutes}:00`);
-  
+
     // Adjust for AM/PM
-    if (period === 'PM' && hours !== '12') {
-      parsedDate.setHours(parsedDate.getHours() + 12);  // Add 12 hours for PM if not 12 PM
-    } else if (period === 'AM' && hours === '12') {
-      parsedDate.setHours(0);  // Set hour to 0 for 12 AM
+    if (period === "PM" && hours !== "12") {
+      parsedDate.setHours(parsedDate.getHours() + 12); // Add 12 hours for PM if not 12 PM
+    } else if (period === "AM" && hours === "12") {
+      parsedDate.setHours(0); // Set hour to 0 for 12 AM
     }
-  
+
     // Manually adjust the time by adding 2 hours (if needed)
     parsedDate.setHours(parsedDate.getHours() + 2); // Adjust for timezone difference
-  
+
     if (isNaN(parsedDate.getTime())) {
       console.error("Invalid date format:", dateString);
-      return "Invalid Time";  // Return error message if the date is invalid
+      return "Invalid Time"; // Return error message if the date is invalid
     }
-  
+
     // Convert to 12-hour format
     let formattedHours = parsedDate.getHours() % 12;
     formattedHours = formattedHours ? formattedHours : 12; // The hour '0' should be '12'
-    const formattedMinutes = parsedDate.getMinutes() < 10 ? '0' + parsedDate.getMinutes() : parsedDate.getMinutes();
-    const ampm = parsedDate.getHours() >= 12 ? 'PM' : 'AM';
-  
+    const formattedMinutes =
+      parsedDate.getMinutes() < 10
+        ? "0" + parsedDate.getMinutes()
+        : parsedDate.getMinutes();
+    const ampm = parsedDate.getHours() >= 12 ? "PM" : "AM";
+
     // Log the adjusted and formatted time
     const formattedTime = `${formattedHours}:${formattedMinutes} ${ampm}`;
     console.log("Formatted Time:", formattedTime); // Log the formatted time
-  
+
     return formattedTime;
-  }
-  
+  };
+  const handleCallPress = (telephone) => {
+    if (telephone) {
+      const phoneNumber = `tel:${telephone}`;
+      Linking.openURL(phoneNumber).catch((err) =>
+        console.error("An error occurred while trying to connect", err)
+      );
+    } else {
+      alert("Phone number not available");
+    }
+  };
 
   return (
     <View style={styles.screen}>
@@ -253,10 +260,20 @@ console.log('Current Date and Time:', currentDateTime); // Logs the current date
       {/* List of filtered items */}
       <ScrollView contentContainerStyle={styles.cardsWrapper}>
         {filteredItems.length > 0 ? (
-          filteredItems.map((item,index) => (
+          filteredItems.map((item, index) => (
             <View
               key={item.index}
-              style={[styles.cardContainer, { backgroundColor: "green" }]}
+              style={[
+                styles.cardContainer,
+                {
+                  backgroundColor:
+                    item.status === "planifier"
+                      ? "green"
+                      : item.status === "cancel"
+                      ? "red"
+                      : "defaultColor", // fallback color if status is neither "planifier" nor "cancel"
+                },
+              ]}
             >
               <Image
                 source={require("./assets/image/menage.jpg")}
@@ -274,24 +291,34 @@ console.log('Current Date and Time:', currentDateTime); // Logs the current date
                     }}
                   />
                 </Text>
+                <Text style={styles.title}>PRESTATION : {item.vistID}</Text>
                 <Text style={styles.title}>
-                  Prestation {item.vistID}
+                  {currentDateTime} | {formatTime(currentDateTime)}{" "}
                 </Text>
-                <Text style={styles.title}>{currentDateTime} |   {formatTime(currentDateTime)} </Text>
                 <Text style={styles.subtitle}>Name: {item.userName}</Text>
+
                 <View style={styles.detailsContainer}>
                   <Text style={styles.detailsText}>{item.adress}</Text>
                 </View>
-                <Text
-                  style={styles.detailsText1}
-                  onPress={() => openGoogleMaps(item.adress)}
-                >
-                  <Entypo name="location" size={24} color="white" />
-                </Text>
+                <View style={{ flexDirection: "row" }}>
+                  <Text
+                    style={styles.phone}
+                    onPress={() => handleCallPress(item.telephone)}
+                  >
+                    {" "}
+                    <Feather name="phone" size={24} color="white" />
+                  </Text>
+                  <Text
+                    style={styles.detailsText1}
+                    onPress={() => openGoogleMaps(item.adress)}
+                  >
+                    <Entypo name="location" size={24} color="white" />
+                  </Text>
+                </View>
               </View>
 
               {/* Modal */}
-              {/* Modal */}
+
               <Modal
                 animationType="slide"
                 transparent={true}
@@ -446,6 +473,11 @@ const styles = StyleSheet.create({
     fontSize: 17,
     marginTop: 8,
   },
+  phone: {
+    color: "#fff",
+    fontSize: 17,
+    marginTop: 8,
+  },
   file: {
     color: "#fff",
     backgroundColor: "white",
@@ -520,7 +552,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     color: "#203165",
-    right:10
+    right: 10,
   },
   closeButton: {
     position: "absolute",
@@ -631,11 +663,11 @@ const styles = StyleSheet.create({
   comm: {
     flex: 1,
   },
-  description:{
-    fontSize:20,
-    color:'#203165',
-    fontWeight:'bold'
-  }
+  description: {
+    fontSize: 20,
+    color: "#203165",
+    fontWeight: "bold",
+  },
 });
 
 export default Technicien;

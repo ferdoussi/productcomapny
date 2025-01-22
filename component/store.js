@@ -11,9 +11,9 @@ import Header from "./head/header";
 import { useSelector } from "react-redux"; // Import useSelector to access Redux state
 import { useNavigation } from "@react-navigation/native"; // Import navigation hook
 import axios from "axios";
-import { useDispatch } from 'react-redux';
-import { setProduits } from '../redux/productSlice';
-
+import { useDispatch } from "react-redux";
+import { setProduits } from "../redux/productSlice";
+import AntDesign from "@expo/vector-icons/AntDesign";
 const Store = () => {
   const clientID = useSelector((state) => state.client.clientID);
   console.log("ClientID from store page :", clientID);
@@ -63,13 +63,12 @@ const Store = () => {
   //   }
   // }, [clientID, dispatch]);
 
-
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const url = `http://192.168.100.150:8000/api/prestation-notSend/${clientID}`;
-        const response = await axios.get(url); 
-  
+        const response = await axios.get(url);
+
         if (response.data && Array.isArray(response.data.data)) {
           const formattedData = response.data.data
             .filter((item) => item.status === "active")
@@ -80,10 +79,10 @@ const Store = () => {
               surface: item.surface,
               address: item.adress,
             }));
-  
+
           console.log("Formatted Data:", formattedData);
           setProducts(formattedData);
-  
+
           const action = setProduits(formattedData); // Create the action
           console.log("Action Object:", action); // Log the action
           dispatch(action); // Dispatch the action
@@ -97,15 +96,13 @@ const Store = () => {
         setLoading(false);
       }
     };
-  
+
     if (clientID) {
       fetchProducts();
     } else {
       console.log("ClientID not available");
     }
   }, [clientID, dispatch]);
-  
-
 
   const handleContinue = (vistID) => {
     console.log("passing vistid and userid", vistID, clientID);
@@ -117,28 +114,53 @@ const Store = () => {
   }
 
   if (error) {
-    return <Text>{error.message ? error.message : "An unknown error occurred"}</Text>;
+    return (
+      <Text>{error.message ? error.message : "An unknown error occurred"}</Text>
+    );
   }
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />;
+    return (
+      <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
+    );
+  }
+  const homeback =()=>{
+    navigation.navigate('ClientHome')
   }
 
   return (
     <>
       <Header />
       <ScrollView style={styles.container}>
+        <View style={{ flexDirection: "row" }}>
+          <Text style={styles.title1}>Prestation :</Text>
+          <Text style={styles.back1}  onPress={homeback}>
+            <AntDesign name="arrowleft" size={24} color="#203165" />
+            Back
+          </Text>
+        </View>
         {products.length === 0 ? (
-          <Text style={styles.noProductsText}>No active products available.</Text>
+          <View>
+          <Text style={styles.noProductsText}>
+            No active products available. 
+          </Text>
+          <Text style={styles.click} onPress={()=>{navigation.navigate('Home')}}>Continue Send</Text>
+          </View>
           
         ) : (
-          products.map((product,index) => (
+          products.map((product, index) => (
             <View key={index} style={styles.cardContainer}>
               <View style={styles.infoContainer}>
-                <Text style={styles.title}>{product.title || "No Title Available"}</Text>
+                <Text style={styles.title}>
+                  {product.title || "No Title Available"}
+                </Text>
                 <Text style={styles.price}>Prix: {product.prix || "N/A"}</Text>
-                <Text style={styles.detailsText}>Surface: {product.surface || "N/A"}</Text>
-                <Text style={styles.detailsText}>Address: {product.address || "N/A"}</Text>
+                <Text style={styles.detailsText}>
+                  Surface: {product.surface || "N/A"}
+                </Text>
+                <Text style={styles.detailsText}>
+                  Address: {product.address || "N/A"}
+                </Text>
               </View>
               <TouchableOpacity
                 style={styles.button}
@@ -215,10 +237,33 @@ const styles = StyleSheet.create({
   },
   noProductsText: {
     fontSize: 18,
-    color: '#888',
-    textAlign: 'center',
-    fontWeight: 'bold',
+    color: "#888",
+    textAlign: "center",
+    fontWeight: "bold",
     margin: 20,
+  },
+  back1: {
+    marginLeft: 90, // Changed from `left: 100`
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#203165",
+    paddingTop: 15, // Changed `top` to `paddingTop`
+  },
+  title1: {
+    marginTop: 0,
+    marginBottom: 15,
+    marginRight: 100, // Changed `right` to `marginRight`
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#203165",
+    paddingTop: 15, // Changed `top` to `paddingTop`
+    left:20
+  },
+  click:{
+    color:'blue',
+    textAlign:'center',
+    fontSize:20,
+
   }
 });
 

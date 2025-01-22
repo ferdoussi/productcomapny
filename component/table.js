@@ -82,7 +82,7 @@ const TableExample = (vistID) => {
                 {item.status || "No Status"}
               </Text>
 
-              <TouchableOpacity onPress={() => handleContinue(item.vistID)}>
+              <TouchableOpacity onPress={() => handleContinue(item.vistID)} style={styles.cell}>
                 <Icon name="eye" size={20} color="#203165" />
               </TouchableOpacity>
             </View>

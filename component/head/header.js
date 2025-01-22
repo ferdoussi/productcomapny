@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSelector } from 'react-redux';  // Import useSelector to access Redux state
+import React, { useState } from "react";
+import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSelector } from "react-redux"; // Import useSelector to access Redux state
 
 const Header = () => {
   const clientID = useSelector((state) => state.client.clientID);
-  
-  console.log('ClientID for header : ', clientID)
-  
+  const count = useSelector((state) => state.counter.count);
+
+  console.log("ClientID for header : ", clientID);
+
   const [menuVisible, setMenuVisible] = useState(false);
   const navigation = useNavigation();
 
@@ -21,24 +22,20 @@ const Header = () => {
     setMenuVisible(false);
   };
 
-
-
   const handleLogout = async () => {
     try {
       // Remove the authentication token
-      await AsyncStorage.removeItem('authToken');
-      
+      await AsyncStorage.removeItem("authToken");
+
       // Navigate to the login screen and clear the navigation stack
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Login' }],
+        routes: [{ name: "Login" }],
       });
     } catch (error) {
       console.error("Error removing authToken", error);
     }
   };
-  
-
 
   return (
     <View style={styles.container}>
@@ -53,10 +50,12 @@ const Header = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.marketplaceIcon}
-            onPress={() => navigation.navigate('Store',{clientID})}
+            onPress={() => navigation.navigate("Store", { clientID })}
           >
             <Icon name="shopping-cart" size={25} color="#fff" />
-
+            {count !== 0 && (
+              <Text style={styles.count}>{count}</Text> // Only render if count is not 0
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -88,14 +87,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
     marginTop: 30,
-    padding:12
+    padding: 12,
   },
   menuIcon: {
     backgroundColor: "#203165",
     padding: 10,
     borderRadius: 25,
     top: 5,
-    left:3
+    left: 3,
   },
   iconsContainer: {
     flexDirection: "row",
@@ -109,22 +108,16 @@ const styles = StyleSheet.create({
     top: 5,
   },
   marketplaceIcon: {
-    backgroundColor: "#203165",
+    backgroundColor: "#203165", // Keep the existing background color
     padding: 10,
     borderRadius: 25,
     top: 5,
-    right:2
-  },
-  badge: {
-    position: "absolute",
-    top: -5,
-    right: -5,
-    backgroundColor: "#ff0000",
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: "center",
-    alignItems: "center",
+    right: 2,
+    justifyContent: "center", // Center content horizontally
+    alignItems: "center", // Center content vertically
+    position: "relative", // Allows absolute positioning of count
+    width: 50, // Set a specific width for the icon container
+    height: 50, // Set a specific height for the icon container
   },
   badgeText: {
     color: "#fff",
@@ -168,6 +161,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#203165",
     fontWeight: "600",
+  },
+  count: {
+    color: "white",
+    fontSize: 12, // Adjust the font size to make it fit
+    position: "absolute", // Position count on top of the icon
+    top: -5, // Adjust the positioning to move the count slightly above the icon
+    right: -2, // Adjust the positioning to move the count slightly to the right
+    backgroundColor: "red", // Red background for the count badge
+    width: 18, // Set the width of the badge
+    height: 18, // Set the height of the badge
+    borderRadius: 9, // Make the badge circular
+    justifyContent: "center", // Center the text in the badge
+    alignItems: "center", // Center the text in the badge
+    textAlign: "center", // Center the text inside the badge
+    fontWeight: "bold", // Make the count text bold for emphasis
   },
 });
 

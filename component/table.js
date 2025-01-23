@@ -55,7 +55,7 @@ const TableExample = (vistID) => {
       <Text style={styles.id}>Table Prestations :</Text>
       <View style={styles.name}>
         <View style={styles.row}>
-          <Text style={styles.cellHeader}>N!</Text>
+          <Text style={styles.cellHeader}>N°</Text>
           <Text style={styles.cellHeader}>Title</Text>
           <Text style={styles.cellHeader}>Total</Text>
           <Text style={styles.cellHeader}>Status</Text>

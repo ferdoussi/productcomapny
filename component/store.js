@@ -133,14 +133,14 @@ const Store = () => {
       <Header />
       <ScrollView style={styles.container}>
         <View style={{ flexDirection: "row" }}>
-          <Text style={styles.title1}>Prestation :</Text>
+          <Text style={styles.title1}>Prestation  :</Text>
           <Text style={styles.back1}  onPress={homeback}>
             <AntDesign name="arrowleft" size={24} color="#203165" />
             Back
           </Text>
         </View>
         {products.length === 0 ? (
-          <View>
+          <View style={styles.itmes}>
           <Text style={styles.noProductsText}>
             No active products available. 
           </Text>
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   noProductsText: {
-    fontSize: 18,
+    fontSize: 20,
     color: "#888",
     textAlign: "center",
     fontWeight: "bold",
@@ -264,6 +264,9 @@ const styles = StyleSheet.create({
     textAlign:'center',
     fontSize:20,
 
+  },
+  itmes:{
+    marginTop:'50%'
   }
 });
 
